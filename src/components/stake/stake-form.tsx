@@ -9,10 +9,13 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowDown } from 'lucide-react'
 
+const DECIMALS = 6 // FTestXRP has 6 decimals
+
 interface StakeFormProps {
   fxrpBalance: number
   stXrpBalance: number
   exchangeRate: number
+  currentAllowance?: bigint
   onStake?: (amount: bigint) => void
   onUnstake?: (shares: bigint) => void
   onApprove?: (amount: bigint) => void
@@ -25,6 +28,7 @@ export function StakeForm({
   fxrpBalance,
   stXrpBalance,
   exchangeRate,
+  currentAllowance,
   onStake,
   onUnstake,
   onApprove,
@@ -41,17 +45,22 @@ export function StakeForm({
   const receiveStXrp = stakeNum / exchangeRate
   const receiveFxrp = unstakeNum * exchangeRate
 
+  const stakeRaw = BigInt(Math.floor(stakeNum * 10 ** DECIMALS))
+  const needsApproval = currentAllowance !== undefined && stakeRaw > currentAllowance
+
+  const handleApprove = () => {
+    if (stakeNum <= 0) return
+    onApprove?.(stakeRaw)
+  }
+
   const handleStake = () => {
     if (stakeNum <= 0) return
-    const wei = BigInt(Math.floor(stakeNum * 1e18))
-    onApprove?.(wei)
-    // In a real flow, we'd wait for approval confirmation then call deposit
-    onStake?.(wei)
+    onStake?.(stakeRaw)
   }
 
   const handleUnstake = () => {
     if (unstakeNum <= 0) return
-    const shares = BigInt(Math.floor(unstakeNum * 1e18))
+    const shares = BigInt(Math.floor(unstakeNum * 10 ** DECIMALS))
     onUnstake?.(shares)
   }
 
@@ -116,22 +125,37 @@ export function StakeForm({
               Exchange rate: 1 stXRP = {exchangeRate.toFixed(4)} FXRP
             </div>
 
-            <Button
-              className="w-full"
-              size="lg"
-              disabled={!isConnected || stakeNum <= 0 || isApproving || isStaking}
-              onClick={handleStake}
-            >
-              {!isConnected
-                ? 'Connect Wallet'
-                : isApproving
-                  ? 'Approving...'
+            {needsApproval ? (
+              <Button
+                className="w-full"
+                size="lg"
+                disabled={!isConnected || stakeNum <= 0 || isApproving}
+                onClick={handleApprove}
+              >
+                {!isConnected
+                  ? 'Connect Wallet'
+                  : isApproving
+                    ? 'Approving...'
+                    : stakeNum <= 0
+                      ? 'Enter Amount'
+                      : `Approve ${stakeNum} FXRP`}
+              </Button>
+            ) : (
+              <Button
+                className="w-full"
+                size="lg"
+                disabled={!isConnected || stakeNum <= 0 || isStaking}
+                onClick={handleStake}
+              >
+                {!isConnected
+                  ? 'Connect Wallet'
                   : isStaking
                     ? 'Staking...'
                     : stakeNum <= 0
                       ? 'Enter Amount'
-                      : 'Approve & Stake'}
-            </Button>
+                      : `Stake ${stakeNum} FXRP`}
+              </Button>
+            )}
           </TabsContent>
 
           <TabsContent value="unstake" className="space-y-4 mt-4">

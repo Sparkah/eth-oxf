@@ -184,6 +184,7 @@ export function useDemoBalances(): TokenBalance[] {
   return [
     { symbol: 'FLR', name: 'Flare', balance: 15420.5, decimals: 18, logo: '/tokens/flr.svg', address: 'native' },
     { symbol: 'WFLR', name: 'Wrapped Flare', balance: 8200.0, decimals: 18, logo: '/tokens/flr.svg', address: '0x1D80c49BbBCd1C0911346656B529DF9E5c2F783d' },
-    { symbol: 'FXRP', name: 'FAsset XRP', balance: 1250.0, decimals: 18, logo: '/tokens/xrp.svg', address: '0x...' },
+    { symbol: 'FTestXRP', name: 'FXRP', balance: 1250.0, decimals: 6, logo: '/tokens/xrp.svg', address: '0x0b6A3645c240605887a5532109323A3E12273dc7' },
+    { symbol: 'USDT0', name: 'USDT0', balance: 500.0, decimals: 6, logo: '/tokens/usdt.svg', address: '0xC1A5B41512496B80903D1f32d6dEa3a73212E71F' },
   ]
 }

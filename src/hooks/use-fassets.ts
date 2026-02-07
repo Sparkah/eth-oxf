@@ -11,10 +11,11 @@ const ASSET_MANAGER: Record<string, `0x${string}`> = {
   coston2: '0x0000000000000000000000000000000000000000',
 }
 
-export function useFAssets() {
+export function useFAssets(lots: bigint = 0n) {
   const { network } = useNetwork()
   const chainId = network === 'flare' ? flare.id : coston2.id
   const assetManager = ASSET_MANAGER[network]
+  const enabled = assetManager !== '0x0000000000000000000000000000000000000000'
 
   // Read lot size
   const { data: lotSize } = useReadContract({
@@ -22,20 +23,18 @@ export function useFAssets() {
     abi: assetManagerAbi,
     functionName: 'lotSize',
     chainId,
-    query: { enabled: assetManager !== '0x0000000000000000000000000000000000000000' },
+    query: { enabled },
   })
 
-  // Read collateral reservation fee
-  const getReservationFee = (lots: bigint) => {
-    return useReadContract({
-      address: assetManager,
-      abi: assetManagerAbi,
-      functionName: 'getCollateralReservationFee',
-      args: [lots],
-      chainId,
-      query: { enabled: assetManager !== '0x0000000000000000000000000000000000000000' && lots > 0n },
-    })
-  }
+  // Read collateral reservation fee (hook called unconditionally at top level)
+  const { data: reservationFee } = useReadContract({
+    address: assetManager,
+    abi: assetManagerAbi,
+    functionName: 'getCollateralReservationFee',
+    args: [lots],
+    chainId,
+    query: { enabled: enabled && lots > 0n },
+  })
 
   // Write: reserve collateral
   const { writeContract, data: txHash, isPending: isReserving } = useWriteContract()
@@ -46,7 +45,6 @@ export function useFAssets() {
 
   const reserveCollateral = (
     agentVault: `0x${string}`,
-    lots: bigint,
     maxFeeBips: bigint,
     feeValue: bigint
   ) => {
@@ -62,7 +60,7 @@ export function useFAssets() {
 
   return {
     lotSize: lotSize as bigint | undefined,
-    getReservationFee,
+    reservationFee: reservationFee as bigint | undefined,
     reserveCollateral,
     isReserving,
     isConfirming,

@@ -49,6 +49,17 @@ export const TOKENS: TokenMeta[] = [
     },
     feedId: '01555344542f555344000000000000000000000000', // USDT/USD
   },
+  {
+    symbol: 'stFXRP',
+    name: 'Staked FXRP',
+    decimals: 6,
+    logo: '/tokens/xrp.svg',
+    address: {
+      flare: '0x0000000000000000000000000000000000000000',
+      coston2: '0xd0934f2a08e4f41c9969bb11555653524a75952a',
+    },
+    feedId: '015852502f55534400000000000000000000000000', // priced same as XRP
+  },
 ]
 
 export const FEED_IDS = {
