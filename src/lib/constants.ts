@@ -22,7 +22,6 @@ export const DEMO_PRICES: Record<string, number> = {
   stFXRP: 0.58,
   USDT0: 1.0,
   stUSDT0: 1.05,
-  stWFLR: 0.026,
 }
 
 export const DEMO_YIELDS = [
@@ -31,7 +30,7 @@ export const DEMO_YIELDS = [
     asset: 'FXRP',
     apy: 8.5,
     tvl: 0,
-    risk: 'Medium' as const,
+    risk: 'Low' as const,
     description: 'Stake FTestXRP into the ERC-4626 stFXRP vault. Yield accrues from FTSO delegation rewards.',
     lockPeriod: 'None',
     vaultId: 'StFXRP' as const,
@@ -45,15 +44,5 @@ export const DEMO_YIELDS = [
     description: 'Stake USDT0 into the stUSDT0 vault. Earn yield on your stablecoins through Flare DeFi.',
     lockPeriod: 'None',
     vaultId: 'StUSDT0' as const,
-  },
-  {
-    protocol: 'FlareVault',
-    asset: 'WFLR',
-    apy: 6.1,
-    tvl: 0,
-    risk: 'Low' as const,
-    description: 'Stake WFLR into the stWFLR vault. Earn yield from FTSO delegation and FlareDrop distributions.',
-    lockPeriod: 'None',
-    vaultId: 'StWFLR' as const,
   },
 ]

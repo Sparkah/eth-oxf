@@ -27,7 +27,6 @@ export type NetworkId = keyof typeof CONTRACTS
 export const VAULTS = {
   StFXRP: { asset: 'FXRP', symbol: 'stFXRP', name: 'Staked FXRP', decimals: 6, apy: 8.5 },
   StUSDT0: { asset: 'USDT0', symbol: 'stUSDT0', name: 'Staked USDT0', decimals: 6, apy: 5.2 },
-  StWFLR: { asset: 'WFLR', symbol: 'stWFLR', name: 'Staked WFLR', decimals: 18, apy: 6.1 },
 } as const
 
 export type VaultId = keyof typeof VAULTS

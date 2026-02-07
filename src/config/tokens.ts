@@ -71,17 +71,6 @@ export const TOKENS: TokenMeta[] = [
     },
     feedId: '01555344542f555344000000000000000000000000', // priced same as USDT
   },
-  {
-    symbol: 'stWFLR',
-    name: 'Staked WFLR',
-    decimals: 18,
-    logo: '/tokens/flr.svg',
-    address: {
-      flare: '0x0000000000000000000000000000000000000000',
-      coston2: '0x1adfedc11c41624b4ad28c38ac3fa393f1b879c9',
-    },
-    feedId: '01464c522f55534400000000000000000000000000', // priced same as FLR
-  },
 ]
 
 export const FEED_IDS = {
