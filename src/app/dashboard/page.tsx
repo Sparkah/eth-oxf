@@ -11,6 +11,23 @@ import { useFtsoPrices } from '@/hooks/use-ftso-prices'
 export default function DashboardPage() {
   const { address: connectedAddress } = useAccount()
   const [trackedAddresses, setTrackedAddresses] = useState<string[]>([])
+  const [mounted, setMounted] = useState(false)
+
+  // Load from localStorage after mount (avoids SSR hydration mismatch)
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('flarevault-addresses')
+      if (saved) setTrackedAddresses(JSON.parse(saved))
+    } catch {}
+    setMounted(true)
+  }, [])
+
+  // Persist to localStorage on change (only after initial load)
+  useEffect(() => {
+    if (mounted) {
+      localStorage.setItem('flarevault-addresses', JSON.stringify(trackedAddresses))
+    }
+  }, [trackedAddresses, mounted])
 
   // Auto-add connected wallet on first connect
   useEffect(() => {
@@ -29,9 +46,10 @@ export default function DashboardPage() {
   const demoBalances = useDemoBalances()
   const { prices } = useFtsoPrices()
 
-  // Use live data when we have addresses, otherwise demo
-  const balances = hexAddresses.length > 0 && liveBalances.length > 0 ? liveBalances : demoBalances
-  const showingDemo = hexAddresses.length === 0 || liveBalances.length === 0
+  // Only show demo data when no wallets are tracked at all
+  const hasWallets = hexAddresses.length > 0
+  const balances = hasWallets ? liveBalances : demoBalances
+  const showingDemo = !hasWallets
 
   return (
     <div className="space-y-6">
