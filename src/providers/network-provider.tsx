@@ -1,29 +1,28 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useMemo, type ReactNode } from 'react'
+import { useAccount } from 'wagmi'
+import { flare, coston2 } from '@/config/chains'
 import type { NetworkId } from '@/config/contracts'
 
 interface NetworkContextValue {
   network: NetworkId
-  setNetwork: (n: NetworkId) => void
-  toggleNetwork: () => void
 }
 
 const NetworkContext = createContext<NetworkContextValue>({
   network: 'flare',
-  setNetwork: () => {},
-  toggleNetwork: () => {},
 })
 
 export function NetworkProvider({ children }: { children: ReactNode }) {
-  const [network, setNetwork] = useState<NetworkId>('flare')
+  const { chainId } = useAccount()
 
-  const toggleNetwork = useCallback(() => {
-    setNetwork((prev) => (prev === 'flare' ? 'coston2' : 'flare'))
-  }, [])
+  const network = useMemo<NetworkId>(() => {
+    if (chainId === coston2.id) return 'coston2'
+    return 'flare'
+  }, [chainId])
 
   return (
-    <NetworkContext.Provider value={{ network, setNetwork, toggleNetwork }}>
+    <NetworkContext.Provider value={{ network }}>
       {children}
     </NetworkContext.Provider>
   )
