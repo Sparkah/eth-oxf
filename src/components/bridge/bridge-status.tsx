@@ -120,6 +120,22 @@ export function BridgeStatus({ step, agentXrplAddress, paymentReference, xrpAmou
               </div>
             )}
 
+            {/* Ready-to-copy script command */}
+            {xrpAmount !== undefined && paymentReference && (
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Run this to send payment:</p>
+                <div className="flex items-center gap-1">
+                  <code className="text-[10px] font-mono break-all bg-background rounded p-1.5 block w-full">
+                    node scripts/send-xrp-testnet.mjs {agentXrplAddress} {Math.round(xrpAmount * 1e6)} {paymentReference}
+                  </code>
+                  <CopyButton
+                    text={`node scripts/send-xrp-testnet.mjs ${agentXrplAddress} ${Math.round(xrpAmount * 1e6)} ${paymentReference}`}
+                    label="Command"
+                  />
+                </div>
+              </div>
+            )}
+
             <p className="text-xs text-yellow-500 mt-2">
               Send the exact amount with the payment reference included as a memo on the XRPL testnet.
               After FDC verification (~5 min), FTestXRP will mint to your Flare wallet.
