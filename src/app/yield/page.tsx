@@ -7,14 +7,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TrendingUp } from 'lucide-react'
 
 export default function YieldPage() {
-  const { yields, bestYield } = useYieldData()
+  const { yields, bestYield, isLoading } = useYieldData()
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Yield Opportunities</h1>
         <p className="text-sm text-muted-foreground">
-          Compare yield sources across the Flare ecosystem.
+          Live yield data from Flare DeFi protocols via DeFiLlama.
+          {isLoading && ' Loading...'}
         </p>
       </div>
 
