@@ -52,6 +52,7 @@ export function StakeForm({
   const stakeRaw = BigInt(Math.floor(stakeNum * 10 ** decimals))
   const needsApproval = currentAllowance === undefined || stakeRaw > currentAllowance
   const insufficientBalance = stakeNum > fxrpBalance
+  const insufficientShares = unstakeNum > stXrpBalance
 
   const handleApprove = () => {
     if (stakeNum <= 0 || insufficientBalance) return
@@ -64,7 +65,7 @@ export function StakeForm({
   }
 
   const handleUnstake = () => {
-    if (unstakeNum <= 0) return
+    if (unstakeNum <= 0 || insufficientShares) return
     const shares = BigInt(Math.floor(unstakeNum * 10 ** decimals))
     onUnstake?.(shares)
   }
@@ -218,7 +219,7 @@ export function StakeForm({
             <Button
               className="w-full"
               size="lg"
-              disabled={!isConnected || unstakeNum <= 0 || isUnstaking}
+              disabled={!isConnected || unstakeNum <= 0 || insufficientShares || isUnstaking}
               onClick={handleUnstake}
             >
               {!isConnected
@@ -227,7 +228,9 @@ export function StakeForm({
                   ? 'Unstaking...'
                   : unstakeNum <= 0
                     ? 'Enter Amount'
-                    : 'Unstake'}
+                    : insufficientShares
+                      ? `Insufficient ${shareSymbol} Balance`
+                      : 'Unstake'}
             </Button>
           </TabsContent>
         </Tabs>

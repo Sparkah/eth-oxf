@@ -5,7 +5,8 @@ import { useAccount } from 'wagmi'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Wallet, Plus, X } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Wallet, Plus, X, Link } from 'lucide-react'
 import { shortenAddress } from '@/lib/utils'
 
 interface AddressInputProps {
@@ -35,10 +36,16 @@ export function AddressInput({ addresses, onAddressesChange }: AddressInputProps
     onAddressesChange(addresses.filter((a) => a !== addr))
   }
 
+  const isConnected = (addr: string) =>
+    connectedAddress?.toLowerCase() === addr.toLowerCase()
+
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium">Tracked Wallets</CardTitle>
+        <CardTitle className="text-sm font-medium">Portfolio Wallets</CardTitle>
+        <p className="text-xs text-muted-foreground">
+          Track multiple wallets. Balances are aggregated across all.
+        </p>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex gap-2">
@@ -68,7 +75,15 @@ export function AddressInput({ addresses, onAddressesChange }: AddressInputProps
                 key={addr}
                 className="flex items-center justify-between rounded-md bg-muted px-3 py-1.5 text-xs font-mono"
               >
-                <span>{shortenAddress(addr, 6)}</span>
+                <div className="flex items-center gap-2">
+                  <span>{shortenAddress(addr, 6)}</span>
+                  {isConnected(addr) && (
+                    <Badge variant="outline" className="text-[10px] py-0 px-1.5 text-green-500 border-green-500/30">
+                      <Link className="h-2.5 w-2.5 mr-0.5" />
+                      Connected
+                    </Badge>
+                  )}
+                </div>
                 <button
                   onClick={() => removeAddress(addr)}
                   className="text-muted-foreground hover:text-destructive transition-colors"

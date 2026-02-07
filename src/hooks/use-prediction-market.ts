@@ -181,6 +181,11 @@ export function usePredictionMarket() {
     )
   }
 
+  // Track last market ID for each action so confirmation toasts match
+  const lastBetMarket = useRef<number>(0)
+  const lastResolveMarket = useRef<number>(0)
+  const lastClaimMarket = useRef<number>(0)
+
   // --- Write: bet ---
   const {
     writeContract: writeBet,
@@ -191,6 +196,7 @@ export function usePredictionMarket() {
   const { isSuccess: betConfirmed } = useWaitForTransactionReceipt({ hash: betTxHash })
 
   const placeBet = (marketId: number, isYes: boolean, amountEther: string) => {
+    lastBetMarket.current = marketId
     const side = isYes ? 'YES' : 'NO'
     toast.loading(`Placing ${side} bet...`, { id: `bet-${marketId}` })
     writeBet(
@@ -219,6 +225,7 @@ export function usePredictionMarket() {
   const { isSuccess: resolveConfirmed } = useWaitForTransactionReceipt({ hash: resolveTxHash })
 
   const resolveMarket = (marketId: number) => {
+    lastResolveMarket.current = marketId
     toast.loading('Resolving via FTSO Oracle...', { id: `resolve-${marketId}` })
     writeResolve(
       {
@@ -245,6 +252,7 @@ export function usePredictionMarket() {
   const { isSuccess: claimConfirmed } = useWaitForTransactionReceipt({ hash: claimTxHash })
 
   const claimPayout = (marketId: number) => {
+    lastClaimMarket.current = marketId
     toast.loading('Claiming payout...', { id: `claim-${marketId}` })
     writeClaim(
       {
@@ -276,7 +284,7 @@ export function usePredictionMarket() {
     if (betConfirmed && betTxHash && !toasted.current.has(betTxHash)) {
       toasted.current.add(betTxHash)
       refetchAll()
-      toast.success('Bet placed!', { id: `bet-latest` })
+      toast.success('Bet placed!', { id: `bet-${lastBetMarket.current}` })
     }
   }, [betConfirmed, betTxHash])
 
@@ -284,7 +292,7 @@ export function usePredictionMarket() {
     if (resolveConfirmed && resolveTxHash && !toasted.current.has(resolveTxHash)) {
       toasted.current.add(resolveTxHash)
       refetchAll()
-      toast.success('Market resolved via FTSO!', { id: `resolve-latest` })
+      toast.success('Market resolved via FTSO!', { id: `resolve-${lastResolveMarket.current}` })
     }
   }, [resolveConfirmed, resolveTxHash])
 
@@ -292,7 +300,7 @@ export function usePredictionMarket() {
     if (claimConfirmed && claimTxHash && !toasted.current.has(claimTxHash)) {
       toasted.current.add(claimTxHash)
       refetchAll()
-      toast.success('Payout claimed!', { id: `claim-latest` })
+      toast.success('Payout claimed!', { id: `claim-${lastClaimMarket.current}` })
     }
   }, [claimConfirmed, claimTxHash])
 
