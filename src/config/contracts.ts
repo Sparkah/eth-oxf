@@ -9,6 +9,7 @@ export const CONTRACTS = {
     AssetManager_FTestXRP: '0x0000000000000000000000000000000000000000' as const,
     ContractRegistry: '0xaD67FE66660Fb8dFE9d6b1b4240d8650e30F6019' as const,
     Multicall3: '0xcA11bde05977b3631167028862bE2a173976CA11' as const,
+    FlareBet: '0x0000000000000000000000000000000000000000' as const,
   },
   coston2: {
     WFLR: '0xC67DCE33e8b36abDD40FdBCA35F4e24CA3AEe78A' as const,
@@ -20,6 +21,7 @@ export const CONTRACTS = {
     AssetManager_FTestXRP: '0xc1Ca88b937d0b528842F95d5731ffB586f4fbDFA' as const,
     ContractRegistry: '0xaD67FE66660Fb8dFE9d6b1b4240d8650e30F6019' as const,
     Multicall3: '0xcA11bde05977b3631167028862bE2a173976CA11' as const,
+    FlareBet: '0x0520e5acba367ea35c31325d63838ac4255cb5d8' as const,
   },
 } as const
 

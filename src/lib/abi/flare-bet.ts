@@ -1,0 +1,143 @@
+export const flareBetAbi = [
+  {
+    type: 'function',
+    name: 'createMarket',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: '_feedId', type: 'bytes21' },
+      { name: '_targetPrice', type: 'uint256' },
+      { name: '_deadline', type: 'uint256' },
+      { name: '_question', type: 'string' },
+    ],
+    outputs: [{ name: 'marketId', type: 'uint256' }],
+  },
+  {
+    type: 'function',
+    name: 'bet',
+    stateMutability: 'payable',
+    inputs: [
+      { name: '_marketId', type: 'uint256' },
+      { name: '_isYes', type: 'bool' },
+    ],
+    outputs: [],
+  },
+  {
+    type: 'function',
+    name: 'resolve',
+    stateMutability: 'nonpayable',
+    inputs: [{ name: '_marketId', type: 'uint256' }],
+    outputs: [],
+  },
+  {
+    type: 'function',
+    name: 'claim',
+    stateMutability: 'nonpayable',
+    inputs: [{ name: '_marketId', type: 'uint256' }],
+    outputs: [],
+  },
+  {
+    type: 'function',
+    name: 'getMarket',
+    stateMutability: 'view',
+    inputs: [{ name: '_marketId', type: 'uint256' }],
+    outputs: [
+      { name: 'question', type: 'string' },
+      { name: 'feedId', type: 'bytes21' },
+      { name: 'targetPrice', type: 'uint256' },
+      { name: 'deadline', type: 'uint256' },
+      { name: 'yesPool', type: 'uint256' },
+      { name: 'noPool', type: 'uint256' },
+      { name: 'resolvedPrice', type: 'uint256' },
+      { name: 'resolved', type: 'bool' },
+      { name: 'outcome', type: 'bool' },
+      { name: 'creator', type: 'address' },
+    ],
+  },
+  {
+    type: 'function',
+    name: 'calculatePayout',
+    stateMutability: 'view',
+    inputs: [
+      { name: '_marketId', type: 'uint256' },
+      { name: '_user', type: 'address' },
+    ],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+  {
+    type: 'function',
+    name: 'yesBets',
+    stateMutability: 'view',
+    inputs: [
+      { name: '', type: 'uint256' },
+      { name: '', type: 'address' },
+    ],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+  {
+    type: 'function',
+    name: 'noBets',
+    stateMutability: 'view',
+    inputs: [
+      { name: '', type: 'uint256' },
+      { name: '', type: 'address' },
+    ],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+  {
+    type: 'function',
+    name: 'nextMarketId',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+  {
+    type: 'function',
+    name: 'claimed',
+    stateMutability: 'view',
+    inputs: [
+      { name: '', type: 'uint256' },
+      { name: '', type: 'address' },
+    ],
+    outputs: [{ name: '', type: 'bool' }],
+  },
+  {
+    type: 'event',
+    name: 'MarketCreated',
+    inputs: [
+      { name: 'marketId', type: 'uint256', indexed: true },
+      { name: 'question', type: 'string', indexed: false },
+      { name: 'feedId', type: 'bytes21', indexed: false },
+      { name: 'targetPrice', type: 'uint256', indexed: false },
+      { name: 'deadline', type: 'uint256', indexed: false },
+      { name: 'creator', type: 'address', indexed: false },
+    ],
+  },
+  {
+    type: 'event',
+    name: 'BetPlaced',
+    inputs: [
+      { name: 'marketId', type: 'uint256', indexed: true },
+      { name: 'user', type: 'address', indexed: true },
+      { name: 'isYes', type: 'bool', indexed: false },
+      { name: 'amount', type: 'uint256', indexed: false },
+    ],
+  },
+  {
+    type: 'event',
+    name: 'MarketResolved',
+    inputs: [
+      { name: 'marketId', type: 'uint256', indexed: true },
+      { name: 'outcome', type: 'bool', indexed: false },
+      { name: 'resolvedPrice', type: 'uint256', indexed: false },
+    ],
+  },
+  {
+    type: 'event',
+    name: 'Claimed',
+    inputs: [
+      { name: 'marketId', type: 'uint256', indexed: true },
+      { name: 'user', type: 'address', indexed: true },
+      { name: 'payout', type: 'uint256', indexed: false },
+    ],
+  },
+] as const

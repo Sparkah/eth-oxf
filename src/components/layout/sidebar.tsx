@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, TrendingUp, ArrowLeftRight, Coins } from 'lucide-react'
+import { LayoutDashboard, TrendingUp, ArrowLeftRight, Coins, Target } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
@@ -10,6 +10,7 @@ const navItems = [
   { href: '/yield', label: 'Yield', icon: TrendingUp },
   { href: '/bridge', label: 'Bridge', icon: ArrowLeftRight },
   { href: '/stake', label: 'Stake', icon: Coins },
+  { href: '/markets', label: 'Markets', icon: Target },
 ]
 
 export function Sidebar() {
