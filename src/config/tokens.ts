@@ -28,23 +28,26 @@ export const TOKENS: TokenMeta[] = [
     feedId: '01464c522f55534400000000000000000000000000',
   },
   {
-    symbol: 'FXRP',
-    name: 'FAsset XRP',
-    decimals: 18,
+    symbol: 'FTestXRP',
+    name: 'FXRP',
+    decimals: 6,
     logo: '/tokens/xrp.svg',
     address: {
-      flare: '0x00000000000000000000000000000000000F0001',
-      coston2: '0x00000000000000000000000000000000000F0001',
+      flare: '0x96B41289D90444B8adD57e6F265DB5aE8651c470', // mainnet FXRP
+      coston2: '0x0b6A3645c240605887a5532109323A3E12273dc7',
     },
     feedId: '015852502f55534400000000000000000000000000', // XRP/USD
   },
   {
-    symbol: 'XRP',
-    name: 'XRP',
+    symbol: 'USDT0',
+    name: 'USDT0',
     decimals: 6,
-    logo: '/tokens/xrp.svg',
-    address: { flare: 'native', coston2: 'native' }, // not on Flare natively, used for price
-    feedId: '015852502f55534400000000000000000000000000',
+    logo: '/tokens/usdt.svg',
+    address: {
+      flare: '0x0000000000000000000000000000000000000000', // TBD mainnet
+      coston2: '0xC1A5B41512496B80903D1f32d6dEa3a73212E71F',
+    },
+    feedId: '01555344542f555344000000000000000000000000', // USDT/USD
   },
 ]
 

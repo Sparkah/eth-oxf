@@ -13,10 +13,13 @@ export const PRICE_POLL_INTERVAL = 10_000
 // Demo / fallback data for when chain reads fail
 export const DEMO_PRICES: Record<string, number> = {
   FLR: 0.025,
+  C2FLR: 0.025,
   WFLR: 0.025,
   XRP: 0.55,
   FXRP: 0.55,
+  FTestXRP: 0.55,
   stXRP: 0.58,
+  USDT0: 1.0,
 }
 
 export const DEMO_YIELDS = [
