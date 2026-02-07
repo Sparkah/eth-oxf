@@ -21,8 +21,7 @@ export default function YieldPage() {
       <div>
         <h1 className="text-2xl font-bold">Yield Opportunities</h1>
         <p className="text-sm text-muted-foreground">
-          Live yield data from Flare DeFi protocols via DeFiLlama.
-          {isLoading && ' Loading...'}
+          Compare yield sources across the Flare ecosystem.
         </p>
       </div>
 
