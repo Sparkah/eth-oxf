@@ -10,15 +10,15 @@ interface NetworkContextValue {
 }
 
 const NetworkContext = createContext<NetworkContextValue>({
-  network: 'flare',
+  network: 'coston2',
 })
 
 export function NetworkProvider({ children }: { children: ReactNode }) {
   const { chainId } = useAccount()
 
   const network = useMemo<NetworkId>(() => {
-    if (chainId === coston2.id) return 'coston2'
-    return 'flare'
+    if (chainId === flare.id) return 'flare'
+    return 'coston2'
   }, [chainId])
 
   return (
