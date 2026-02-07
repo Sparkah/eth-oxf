@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useReadContract, useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi'
+import { toast } from 'sonner'
 import { stfxrpVaultAbi } from '@/lib/abi/stfxrp-vault'
 import { erc20Abi } from '@/lib/abi/erc20'
 import { useNetwork } from '@/providers/network-provider'
@@ -75,13 +76,20 @@ export function useStaking() {
   const { isSuccess: approveConfirmed } = useWaitForTransactionReceipt({ hash: approveTxHash })
 
   const approve = (amount: bigint) => {
-    writeApprove({
-      address: fxrpAddress,
-      abi: erc20Abi,
-      functionName: 'approve',
-      args: [vaultAddress, amount],
-      chainId,
-    })
+    toast.loading('Waiting for approval...', { id: 'approve' })
+    writeApprove(
+      {
+        address: fxrpAddress,
+        abi: erc20Abi,
+        functionName: 'approve',
+        args: [vaultAddress, amount],
+        chainId,
+      },
+      {
+        onError: () => toast.error('Approval failed', { id: 'approve' }),
+        onSuccess: () => toast.loading('Approval submitted, confirming...', { id: 'approve' }),
+      },
+    )
   }
 
   // Write: deposit FXRP
@@ -95,13 +103,20 @@ export function useStaking() {
     useWaitForTransactionReceipt({ hash: depositTxHash })
 
   const deposit = (amount: bigint) => {
-    writeDeposit({
-      address: vaultAddress,
-      abi: stfxrpVaultAbi,
-      functionName: 'deposit',
-      args: [amount],
-      chainId,
-    })
+    toast.loading('Waiting for deposit...', { id: 'deposit' })
+    writeDeposit(
+      {
+        address: vaultAddress,
+        abi: stfxrpVaultAbi,
+        functionName: 'deposit',
+        args: [amount],
+        chainId,
+      },
+      {
+        onError: () => toast.error('Deposit failed', { id: 'deposit' }),
+        onSuccess: () => toast.loading('Deposit submitted, confirming...', { id: 'deposit' }),
+      },
+    )
   }
 
   // Write: redeem stFXRP
@@ -114,36 +129,65 @@ export function useStaking() {
   const { isSuccess: redeemConfirmed } = useWaitForTransactionReceipt({ hash: redeemTxHash })
 
   const redeem = (shares: bigint) => {
-    writeRedeem({
-      address: vaultAddress,
-      abi: stfxrpVaultAbi,
-      functionName: 'redeem',
-      args: [shares],
-      chainId,
-    })
+    toast.loading('Waiting for unstake...', { id: 'redeem' })
+    writeRedeem(
+      {
+        address: vaultAddress,
+        abi: stfxrpVaultAbi,
+        functionName: 'redeem',
+        args: [shares],
+        chainId,
+      },
+      {
+        onError: () => toast.error('Unstake failed', { id: 'redeem' }),
+        onSuccess: () => toast.loading('Unstake submitted, confirming...', { id: 'redeem' }),
+      },
+    )
   }
 
-  // Refetch allowance after approval confirms
-  useEffect(() => {
-    if (approveConfirmed) refetchAllowance()
-  }, [approveConfirmed, refetchAllowance])
+  // Track which tx hashes we've already toasted to avoid duplicate notifications
+  const toasted = useRef<Set<string>>(new Set())
 
-  // Refetch balances after deposit confirms
+  // Refetch allowance + toast after approval confirms
   useEffect(() => {
-    if (depositConfirmed) {
+    if (approveConfirmed && approveTxHash && !toasted.current.has(approveTxHash)) {
+      toasted.current.add(approveTxHash)
+      refetchAllowance()
+      toast.success('Approval confirmed', {
+        id: 'approve',
+        description: 'You can now deposit your FXRP into the vault.',
+      })
+    }
+  }, [approveConfirmed, approveTxHash, refetchAllowance])
+
+  // Refetch balances + toast after deposit confirms
+  useEffect(() => {
+    if (depositConfirmed && depositTxHash && !toasted.current.has(depositTxHash)) {
+      toasted.current.add(depositTxHash)
       refetchBalance()
       refetchFxrp()
       refetchAllowance()
+      toast.success('Stake successful!', {
+        id: 'deposit',
+        description: 'Your FXRP has been deposited and you received stFXRP.',
+        duration: 6000,
+      })
     }
-  }, [depositConfirmed, refetchBalance, refetchFxrp, refetchAllowance])
+  }, [depositConfirmed, depositTxHash, refetchBalance, refetchFxrp, refetchAllowance])
 
-  // Refetch balances after redeem confirms
+  // Refetch balances + toast after redeem confirms
   useEffect(() => {
-    if (redeemConfirmed) {
+    if (redeemConfirmed && redeemTxHash && !toasted.current.has(redeemTxHash)) {
+      toasted.current.add(redeemTxHash)
       refetchBalance()
       refetchFxrp()
+      toast.success('Unstake successful!', {
+        id: 'redeem',
+        description: 'Your stFXRP has been redeemed for FXRP.',
+        duration: 6000,
+      })
     }
-  }, [redeemConfirmed, refetchBalance, refetchFxrp])
+  }, [redeemConfirmed, redeemTxHash, refetchBalance, refetchFxrp])
 
   // Calculate exchange rate
   const exchangeRate =

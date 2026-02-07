@@ -5,6 +5,7 @@ import { Web3Provider } from '@/providers/wagmi-provider'
 import { NetworkProvider } from '@/providers/network-provider'
 import { Header } from '@/components/layout/header'
 import { Sidebar } from '@/components/layout/sidebar'
+import { Toaster } from 'sonner'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -41,6 +42,7 @@ export default function RootLayout({
               </div>
             </div>
           </NetworkProvider>
+          <Toaster theme="dark" position="top-right" richColors />
         </Web3Provider>
       </body>
     </html>
