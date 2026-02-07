@@ -35,6 +35,7 @@ export function YieldTable({ yields }: { yields: YieldOpportunity[] }) {
               <TableHead className="text-right">TVL</TableHead>
               <TableHead>Risk</TableHead>
               <TableHead>Lock</TableHead>
+              <TableHead>Source</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -50,6 +51,15 @@ export function YieldTable({ yields }: { yields: YieldOpportunity[] }) {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-muted-foreground">{y.lockPeriod}</TableCell>
+                <TableCell>
+                  {y.curator ? (
+                    <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/20 text-[10px]">
+                      {y.curator}
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-[10px]">Native</Badge>
+                  )}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

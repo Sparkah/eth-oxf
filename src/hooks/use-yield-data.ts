@@ -12,6 +12,8 @@ export interface YieldOpportunity {
   description: string
   lockPeriod: string
   vaultId?: VaultId
+  curator?: string
+  url?: string
 }
 
 export function useYieldData() {

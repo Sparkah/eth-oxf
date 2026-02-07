@@ -14,7 +14,7 @@ const riskColor = {
 }
 
 export function YieldCard({ opportunity }: { opportunity: YieldOpportunity }) {
-  const { protocol, asset, apy, tvl, risk, description, lockPeriod, vaultId } = opportunity
+  const { protocol, asset, apy, tvl, risk, description, lockPeriod, vaultId, curator, url } = opportunity
 
   const stakeHref = vaultId ? `/stake?vault=${vaultId}` : '/stake'
 
@@ -26,9 +26,16 @@ export function YieldCard({ opportunity }: { opportunity: YieldOpportunity }) {
             <CardTitle className="text-base">{protocol}</CardTitle>
             <p className="text-xs text-muted-foreground mt-0.5">{asset}</p>
           </div>
-          <Badge variant="outline" className={riskColor[risk]}>
-            {risk}
-          </Badge>
+          <div className="flex gap-1">
+            {curator && (
+              <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/20 text-[10px]">
+                Curated
+              </Badge>
+            )}
+            <Badge variant="outline" className={riskColor[risk]}>
+              {risk}
+            </Badge>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 flex-1">
@@ -49,11 +56,19 @@ export function YieldCard({ opportunity }: { opportunity: YieldOpportunity }) {
           </div>
         </div>
 
-        <Link href={stakeHref}>
-          <Button className="w-full mt-2" size="sm">
-            Stake Now
-          </Button>
-        </Link>
+        {url ? (
+          <a href={url} target="_blank" rel="noopener noreferrer">
+            <Button className="w-full mt-2" size="sm" variant="outline">
+              View on {protocol}
+            </Button>
+          </a>
+        ) : (
+          <Link href={stakeHref}>
+            <Button className="w-full mt-2" size="sm">
+              Stake Now
+            </Button>
+          </Link>
+        )}
       </CardContent>
     </Card>
   )
