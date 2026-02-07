@@ -1,101 +1,155 @@
 # FlareVault
 
-A portfolio dashboard and DeFi toolkit for the Flare ecosystem. Track token balances with live USD prices from **FTSOv2**, stake FTestXRP into an **ERC-4626 vault** on Coston2, and explore yield opportunities — all from a single UI.
+A DeFi toolkit and prediction market platform for the Flare ecosystem. FTSO-resolved prediction markets, ERC-4626 staking vaults, FAssets bridge, live curated yield aggregation, and multi-wallet portfolio tracking — all in one UI.
 
-Built for **ETH Oxford 2026** (Flare track).
+Built for **ETH Oxford 2026** — submitting to **Flare Main Track** + **Prediction Markets & DeFi**.
 
-## Features
+> **Pitch Video:** [TODO — add link]
+>
+> **Live Demo:** Deployed on Coston2 testnet. Clone, `npm install --legacy-peer-deps`, `npm run dev`.
 
-- **Portfolio Dashboard** — Enter any wallet address (or connect via RainbowKit) to view FLR, WFLR, FTestXRP, USDT0, and stFXRP balances with live USD valuations from FTSOv2 price feeds.
-- **Multi-Wallet Tracking** — Track multiple wallet addresses simultaneously; balances aggregate across all wallets. Addresses persist in localStorage.
-- **Multi-Vault Staking (ERC-4626)** — Deposit FTestXRP or USDT0 into ERC-4626 vaults to receive yield-bearing receipt tokens (stFXRP, stUSDT0). Proper approve → deposit flow with toast notifications.
-- **FAssets Bridge (XRP → FTestXRP)** — Real on-chain collateral reservation via the FAssets AssetManager on Coston2. Fetches available agents, calculates fees, calls `reserveCollateral`, and displays XRPL payment details from the `CollateralReserved` event.
-- **Live FTSO Prices** — Prices are resolved on-chain: ContractRegistry → FtsoV2 → `getFeedsByIdInWei()` for FLR/USD and XRP/USD feeds.
-- **Yield Comparison** — Compare yield opportunities across FlareVault staking vaults with live APY data.
-- **Network Toggle** — Seamlessly switch between Flare mainnet and Coston2 testnet via the RainbowKit chain selector.
+## What We Built
+
+### FTSO-Resolved Prediction Markets (FlareBet)
+Binary outcome prediction markets where users bet with native C2FLR on whether an asset will hit a target price by a deadline. Markets resolve **trustlessly on-chain** by reading Flare's FTSO price oracle — no centralized resolver needed.
+
+- Create markets for any FTSO feed (FLR, XRP, BTC, ETH)
+- Bet YES or NO with native C2FLR (no approve step needed)
+- After deadline, anyone calls `resolve()` which reads `FtsoV2.getFeedByIdInWei()` via ContractRegistry
+- Winners split the entire pot proportionally. No platform fee.
+- Live probability estimates derived from current FTSO price vs target + time remaining
+
+### ERC-4626 Staking Vaults
+Deposit FTestXRP or USDT0 into tokenized vaults to receive yield-bearing receipt tokens (stFXRP, stUSDT0). Exchange rate increases as rewards accrue.
+
+### FAssets Bridge (XRP to Flare)
+Real on-chain FAssets integration — discover available agents, reserve collateral via AssetManager, and receive XRPL payment instructions from the `CollateralReserved` event.
+
+### Curated Yield Aggregation
+Live yield data fetched from DeFiLlama for Flare ecosystem protocols: **Kinetic Finance**, **Spectra**, **Sceptre**, and **Clearpool**. Real APY, TVL, and risk classification alongside native FlareVault staking.
+
+### Multi-Wallet Portfolio Dashboard
+Track multiple wallet addresses with live FTSOv2 price valuations. Connected wallet shown with badge, balances aggregated across all tracked wallets.
 
 ## Flare Enshrined Protocols Used
 
 | Protocol | Usage |
 |----------|-------|
-| **FTSOv2** | Live price feeds for FLR/USD and XRP/USD via `getFeedsByIdInWei()`, resolved through ContractRegistry |
-| **FAssets** | Real FAssets bridge integration — `reserveCollateral` on AssetManager (`0xc1Ca88b937d0b528842F95d5731ffB586f4fbDFA`), agent discovery via `getAvailableAgentsDetailedList`, `CollateralReserved` event parsing for payment details |
+| **FTSOv2** | Price feeds for prediction market resolution (`getFeedByIdInWei`), dashboard valuations (`getFeedsByIdInWei`), and probability estimates. Resolved via ContractRegistry. |
+| **FAssets** | Bridge integration — `reserveCollateral` on AssetManager, agent discovery, `CollateralReserved` event parsing for XRPL payment details. |
+| **ContractRegistry** | Used on-chain by FlareBet contract to dynamically resolve FtsoV2 address. Same pattern used in frontend for price reads. |
 
-## Deployed Contracts
+## Deployed Contracts (Coston2)
 
-| Contract | Asset | Network | Address |
-|----------|-------|---------|---------|
-| StFXRP Vault | FTestXRP | Coston2 | `0xd0934f2a08e4f41c9969bb11555653524a75952a` |
-| StUSDT0 Vault | USDT0 | Coston2 | `0x698278d81dab910e6cb0e68f8b503ba3a3f08787` |
-| StWFLR Vault | WFLR | Coston2 | `0x1adfedc11c41624b4ad28c38ac3fa393f1b879c9` |
+| Contract | Address | Purpose |
+|----------|---------|---------|
+| **FlareBet** | [`0x0520e5acba367ea35c31325d63838ac4255cb5d8`](https://coston2-explorer.flare.network/address/0x0520e5acba367ea35c31325d63838ac4255cb5d8) | Prediction markets |
+| StFXRP Vault | [`0xd0934f2a08e4f41c9969bb11555653524a75952a`](https://coston2-explorer.flare.network/address/0xd0934f2a08e4f41c9969bb11555653524a75952a) | ERC-4626 FTestXRP vault |
+| StUSDT0 Vault | [`0x698278d81dab910e6cb0e68f8b503ba3a3f08787`](https://coston2-explorer.flare.network/address/0x698278d81dab910e6cb0e68f8b503ba3a3f08787) | ERC-4626 USDT0 vault |
+| StWFLR Vault | [`0x1adfedc11c41624b4ad28c38ac3fa393f1b879c9`](https://coston2-explorer.flare.network/address/0x1adfedc11c41624b4ad28c38ac3fa393f1b879c9) | ERC-4626 WFLR vault |
 
-All vaults follow the ERC-4626 tokenized vault standard. Deposit the underlying asset to receive yield-bearing receipt tokens (stFXRP, stUSDT0, stWFLR).
+## Architecture
+
+```
+FlareBet.sol (on-chain, Coston2)
+  ├── createMarket(feedId, targetPrice, deadline, question)
+  ├── bet(marketId, isYes) payable     ← users send C2FLR
+  ├── resolve(marketId)                ← reads FTSO via ContractRegistry
+  └── claim(marketId)                  ← winners split pot
+
+Frontend (Next.js)
+  ├── /markets     ← Create/bet/resolve/claim prediction markets
+  ├── /dashboard   ← Multi-wallet portfolio with FTSO prices
+  ├── /yield       ← Live curated yield from DeFiLlama
+  ├── /stake       ← ERC-4626 vault deposit/withdraw
+  └── /bridge      ← FAssets XRP → FTestXRP
+```
 
 ## Tech Stack
 
-- **Next.js 16** (App Router)
-- **Wagmi v3 + viem** for wallet connection and contract reads/writes
-- **RainbowKit** for wallet UI
-- **shadcn/ui + Tailwind CSS v4** for components
-- **Solidity 0.8.28** (ERC-4626 vault, compiled with solcjs)
+- **Next.js 16** (App Router, Turbopack)
+- **Wagmi v3 + viem** — wallet connection, contract reads/writes, multicall
+- **RainbowKit** — wallet UI
+- **shadcn/ui + Tailwind CSS v4** — components
+- **Solidity 0.8.20** — FlareBet prediction market + ERC-4626 vaults
+- **DeFiLlama API** — live yield data for curated Flare protocols
+- **sonner** — toast notifications for tx lifecycle
 
 ## Getting Started
 
 ```bash
-# Install dependencies
 npm install --legacy-peer-deps
-
-# Run development server
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) and connect a wallet on Coston2 testnet.
 
-To get testnet tokens: [Flare Faucet](https://faucet.flare.network/) (request C2FLR, FTestXRP, USDT0).
+**Testnet tokens:** [Flare Faucet](https://faucet.flare.network/coston2) — request C2FLR, then use the app.
+
+### Deploy FlareBet yourself
+
+```bash
+# Compile
+npx solc --abi --bin contracts/FlareBet.sol -o artifacts/
+
+# Deploy (set your private key)
+PRIVATE_KEY=0x... npx tsx scripts/deploy-flarebet.ts
+```
 
 ## Project Structure
 
 ```
 src/
 ├── app/                    # Next.js App Router pages
-│   ├── dashboard/          # Portfolio view
-│   ├── stake/              # FXRP → stFXRP staking
-│   ├── yield/              # Yield comparison
-│   └── bridge/             # XRP → FTestXRP bridge (FAssets)
-├── components/             # React components
+│   ├── dashboard/          # Multi-wallet portfolio
+│   ├── markets/            # Prediction markets (FlareBet)
+│   ├── stake/              # ERC-4626 vault staking
+│   ├── yield/              # Curated yield aggregation
+│   └── bridge/             # FAssets XRP → FTestXRP
+├── components/
 │   ├── layout/             # Header, sidebar
-│   ├── portfolio/          # Balance table, charts, address input
+│   ├── portfolio/          # Balance table, charts, wallet input
 │   ├── stake/              # Stake form, stats
 │   └── ui/                 # shadcn primitives
-├── config/                 # Chain definitions, contract addresses, tokens
-├── hooks/                  # Custom hooks for on-chain data
-│   ├── use-token-balances  # Multicall3 batched balance reads
-│   ├── use-ftso-prices     # FTSOv2 price feed reads
-│   ├── use-firelight       # ERC-4626 vault interactions
-│   ├── use-fassets          # FAssets bridge (AssetManager reads/writes)
-│   └── use-yield-data      # Yield opportunity aggregation
+├── config/                 # Chains, contract addresses
+├── hooks/
+│   ├── use-prediction-market  # FlareBet reads/writes
+│   ├── use-token-balances     # Multicall3 batched balance reads
+│   ├── use-ftso-prices        # FTSOv2 price feed reads
+│   ├── use-firelight          # ERC-4626 vault interactions
+│   ├── use-fassets            # FAssets bridge
+│   └── use-yield-data         # DeFiLlama yield aggregation
 ├── lib/abi/                # Contract ABIs
 └── providers/              # Wagmi, RainbowKit, network context
+
 contracts/
-└── StFXRP.sol              # ERC-4626 staking vault (deployed to Coston2)
+├── FlareBet.sol            # FTSO-resolved prediction markets
+└── StFXRP.sol              # ERC-4626 staking vault
 ```
 
 ## Feedback on Building on Flare
 
 ### What worked well
 
-- **ContractRegistry pattern** — Having a single on-chain registry (`0xaD67FE66660Fb8dFE9d6b1b4240d8650e30F6019`, same address on all networks) that resolves protocol contract addresses is excellent. It means our code doesn't hardcode FTSOv2 addresses and automatically adapts if the implementation is upgraded.
-- **FTSOv2 price feeds** — `getFeedsByIdInWei()` is a clean API. Getting prices normalized to 18-decimal wei precision removes the need to handle varying decimals per feed. The feed ID scheme (category byte + ticker) is intuitive.
-- **EVM compatibility** — Standard ERC-20 and ERC-4626 patterns work out of the box. We deployed a vanilla Solidity vault with no Flare-specific modifications and it worked immediately on Coston2.
-- **Coston2 testnet** — Fast block times (~1.8s), free faucet tokens, same ContractRegistry address as mainnet — testnet experience was smooth.
-- **RPC reliability** — `https://coston2-api.flare.network/ext/C/rpc` was stable throughout the hackathon with no rate limiting issues.
+- **ContractRegistry pattern** — Having a single on-chain registry (`0xaD67FE66660Fb8dFE9d6b1b4240d8650e30F6019`, same address on all networks) that resolves protocol addresses is excellent. Our FlareBet contract uses it on-chain to dynamically resolve the FtsoV2 address, meaning it automatically adapts if the implementation is upgraded. This is a great design pattern more chains should adopt.
+
+- **FTSOv2 for prediction market resolution** — Using `getFeedByIdInWei()` on-chain to resolve prediction markets is clean and trustless. The 18-decimal wei precision meant no decimal conversion needed. The feed ID scheme (category byte + ASCII ticker + zero-padding) is straightforward once you understand the encoding.
+
+- **EVM compatibility** — Standard Solidity patterns work out of the box. We deployed vanilla ERC-4626 vaults and a custom prediction market contract with no Flare-specific modifications needed. The EVM execution environment is fully compatible.
+
+- **Coston2 testnet** — Fast block times (~1.8s), reliable faucet, same ContractRegistry address as mainnet. Deployment and testing was smooth throughout the hackathon.
+
+- **Ecosystem protocols on DeFiLlama** — Kinetic Finance, Spectra, Sceptre, and Clearpool are all indexed on DeFiLlama with Flare chain data. This let us build live yield aggregation with real TVL and APY data from the ecosystem.
 
 ### Areas for improvement
 
-- **FAssets documentation** — The FAssets minting flow (collateral reservation → XRPL payment → FDC verification → mint) is complex. Finding the correct Coston2 AssetManager address required digging through the `fasset-indexer` GitHub repo rather than being clearly documented. More end-to-end code examples for the `reserveCollateral` → `CollateralReserved` event flow would help frontend developers integrate FAssets.
-- **Tooling compatibility** — Hardhat v3 had compatibility issues with some Flare tooling. We ultimately used solcjs + viem directly for compilation and deployment, which worked well but isn't the standard developer path.
-- **Token discovery** — Finding the correct Coston2 token addresses (FTestXRP, USDT0) required querying the block explorer API rather than having a clear canonical token list. A Flare token registry or well-documented testnet token list would help.
-- **FTSOv2 payable functions** — The `payable` modifier on FTSOv2 read functions (for future fee structure) can confuse developers using wagmi's `useReadContract`, since it sends `eth_call` without value. Documentation clarifying this is free for static calls would help.
+- **FAssets documentation** — The minting flow (collateral reservation → XRPL payment → FDC verification → mint) is complex. Finding the correct Coston2 AssetManager address required digging through GitHub repos. More end-to-end frontend examples for the `reserveCollateral` → `CollateralReserved` event flow would help.
+
+- **Tooling** — Hardhat v3 had compatibility issues. We used solcjs/solc + viem directly for compilation and deployment, which worked but isn't the documented developer path.
+
+- **Token discovery** — Finding correct Coston2 token addresses required block explorer queries. A canonical testnet token list or registry would save time.
+
+- **FTSOv2 payable functions** — The `payable` modifier on read functions confused our wagmi integration initially. Clarifying in docs that static calls (eth_call) are free would help.
 
 ## License
 
