@@ -14,7 +14,9 @@ const riskColor = {
 }
 
 export function YieldCard({ opportunity }: { opportunity: YieldOpportunity }) {
-  const { protocol, asset, apy, tvl, risk, description, lockPeriod } = opportunity
+  const { protocol, asset, apy, tvl, risk, description, lockPeriod, vaultId } = opportunity
+
+  const stakeHref = vaultId ? `/stake?vault=${vaultId}` : '/stake'
 
   return (
     <Card className="flex flex-col">
@@ -39,7 +41,7 @@ export function YieldCard({ opportunity }: { opportunity: YieldOpportunity }) {
           </div>
           <div>
             <p className="text-xs text-muted-foreground">TVL</p>
-            <p className="text-sm font-medium">${formatCompact(tvl)}</p>
+            <p className="text-sm font-medium">{tvl > 0 ? `$${formatCompact(tvl)}` : '-'}</p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Lock</p>
@@ -47,9 +49,9 @@ export function YieldCard({ opportunity }: { opportunity: YieldOpportunity }) {
           </div>
         </div>
 
-        <Link href={asset === 'FXRP' ? '/stake' : '/dashboard'}>
+        <Link href={stakeHref}>
           <Button className="w-full mt-2" size="sm">
-            {asset === 'FXRP' ? 'Stake Now' : 'Learn More'}
+            Stake Now
           </Button>
         </Link>
       </CardContent>

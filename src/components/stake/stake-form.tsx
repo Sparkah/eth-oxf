@@ -9,8 +9,6 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowDown } from 'lucide-react'
 
-const DECIMALS = 6 // FTestXRP has 6 decimals
-
 interface StakeFormProps {
   fxrpBalance: number
   stXrpBalance: number
@@ -22,6 +20,9 @@ interface StakeFormProps {
   isApproving?: boolean
   isStaking?: boolean
   isUnstaking?: boolean
+  assetSymbol?: string
+  shareSymbol?: string
+  decimals?: number
 }
 
 export function StakeForm({
@@ -35,6 +36,9 @@ export function StakeForm({
   isApproving,
   isStaking,
   isUnstaking,
+  assetSymbol = 'FXRP',
+  shareSymbol = 'stFXRP',
+  decimals = 6,
 }: StakeFormProps) {
   const [stakeAmount, setStakeAmount] = useState('')
   const [unstakeAmount, setUnstakeAmount] = useState('')
@@ -42,10 +46,10 @@ export function StakeForm({
 
   const stakeNum = parseFloat(stakeAmount) || 0
   const unstakeNum = parseFloat(unstakeAmount) || 0
-  const receiveStXrp = stakeNum / exchangeRate
-  const receiveFxrp = unstakeNum * exchangeRate
+  const receiveShares = stakeNum / exchangeRate
+  const receiveAsset = unstakeNum * exchangeRate
 
-  const stakeRaw = BigInt(Math.floor(stakeNum * 10 ** DECIMALS))
+  const stakeRaw = BigInt(Math.floor(stakeNum * 10 ** decimals))
   const needsApproval = currentAllowance === undefined || stakeRaw > currentAllowance
   const insufficientBalance = stakeNum > fxrpBalance
 
@@ -61,14 +65,17 @@ export function StakeForm({
 
   const handleUnstake = () => {
     if (unstakeNum <= 0) return
-    const shares = BigInt(Math.floor(unstakeNum * 10 ** DECIMALS))
+    const shares = BigInt(Math.floor(unstakeNum * 10 ** decimals))
     onUnstake?.(shares)
   }
+
+  const assetIcon = assetSymbol.slice(0, 2).toUpperCase()
+  const shareIcon = shareSymbol.slice(0, 2).toLowerCase()
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>FXRP Staking via Firelight</CardTitle>
+        <CardTitle>{assetSymbol} Staking</CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="stake">
@@ -85,12 +92,12 @@ export function StakeForm({
                   className="text-xs text-primary"
                   onClick={() => setStakeAmount(fxrpBalance.toString())}
                 >
-                  Max: {fxrpBalance.toFixed(2)} FXRP
+                  Max: {fxrpBalance.toFixed(2)} {assetSymbol}
                 </button>
               </div>
               <div className="flex items-center gap-2 rounded-lg border border-border p-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-bold">
-                  FX
+                  {assetIcon}
                 </div>
                 <Input
                   type="number"
@@ -99,7 +106,7 @@ export function StakeForm({
                   onChange={(e) => setStakeAmount(e.target.value)}
                   className="border-0 bg-transparent text-lg font-mono p-0 h-auto focus-visible:ring-0"
                 />
-                <span className="text-sm text-muted-foreground shrink-0">FXRP</span>
+                <span className="text-sm text-muted-foreground shrink-0">{assetSymbol}</span>
               </div>
             </div>
 
@@ -113,17 +120,17 @@ export function StakeForm({
               <Label className="text-xs text-muted-foreground">You receive</Label>
               <div className="flex items-center gap-2 rounded-lg border border-border p-3 bg-muted/50">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-bold">
-                  sX
+                  {shareIcon}
                 </div>
                 <span className="text-lg font-mono">
-                  {receiveStXrp > 0 ? receiveStXrp.toFixed(4) : '0.0'}
+                  {receiveShares > 0 ? receiveShares.toFixed(4) : '0.0'}
                 </span>
-                <span className="text-sm text-muted-foreground shrink-0 ml-auto">stXRP</span>
+                <span className="text-sm text-muted-foreground shrink-0 ml-auto">{shareSymbol}</span>
               </div>
             </div>
 
             <div className="text-xs text-muted-foreground">
-              Exchange rate: 1 stXRP = {exchangeRate.toFixed(4)} FXRP
+              Exchange rate: 1 {shareSymbol} = {exchangeRate.toFixed(4)} {assetSymbol}
             </div>
 
             {needsApproval ? (
@@ -140,8 +147,8 @@ export function StakeForm({
                     : stakeNum <= 0
                       ? 'Enter Amount'
                       : insufficientBalance
-                        ? 'Insufficient FXRP Balance'
-                        : `Approve ${stakeNum} FXRP`}
+                        ? `Insufficient ${assetSymbol} Balance`
+                        : `Approve ${stakeNum} ${assetSymbol}`}
               </Button>
             ) : (
               <Button
@@ -157,8 +164,8 @@ export function StakeForm({
                     : stakeNum <= 0
                       ? 'Enter Amount'
                       : insufficientBalance
-                        ? 'Insufficient FXRP Balance'
-                        : `Stake ${stakeNum} FXRP`}
+                        ? `Insufficient ${assetSymbol} Balance`
+                        : `Stake ${stakeNum} ${assetSymbol}`}
               </Button>
             )}
           </TabsContent>
@@ -171,12 +178,12 @@ export function StakeForm({
                   className="text-xs text-primary"
                   onClick={() => setUnstakeAmount(stXrpBalance.toString())}
                 >
-                  Max: {stXrpBalance.toFixed(2)} stXRP
+                  Max: {stXrpBalance.toFixed(2)} {shareSymbol}
                 </button>
               </div>
               <div className="flex items-center gap-2 rounded-lg border border-border p-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-bold">
-                  sX
+                  {shareIcon}
                 </div>
                 <Input
                   type="number"
@@ -185,7 +192,7 @@ export function StakeForm({
                   onChange={(e) => setUnstakeAmount(e.target.value)}
                   className="border-0 bg-transparent text-lg font-mono p-0 h-auto focus-visible:ring-0"
                 />
-                <span className="text-sm text-muted-foreground shrink-0">stXRP</span>
+                <span className="text-sm text-muted-foreground shrink-0">{shareSymbol}</span>
               </div>
             </div>
 
@@ -199,12 +206,12 @@ export function StakeForm({
               <Label className="text-xs text-muted-foreground">You receive</Label>
               <div className="flex items-center gap-2 rounded-lg border border-border p-3 bg-muted/50">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-bold">
-                  FX
+                  {assetIcon}
                 </div>
                 <span className="text-lg font-mono">
-                  {receiveFxrp > 0 ? receiveFxrp.toFixed(4) : '0.0'}
+                  {receiveAsset > 0 ? receiveAsset.toFixed(4) : '0.0'}
                 </span>
-                <span className="text-sm text-muted-foreground shrink-0 ml-auto">FXRP</span>
+                <span className="text-sm text-muted-foreground shrink-0 ml-auto">{assetSymbol}</span>
               </div>
             </div>
 

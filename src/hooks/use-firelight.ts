@@ -2,24 +2,26 @@
 
 import { useEffect, useRef } from 'react'
 import { useReadContract, useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi'
-import { toast } from 'sonner'
 import { stfxrpVaultAbi } from '@/lib/abi/stfxrp-vault'
 import { erc20Abi } from '@/lib/abi/erc20'
 import { useNetwork } from '@/providers/network-provider'
-import { CONTRACTS } from '@/config/contracts'
+import { CONTRACTS, VAULTS, type VaultId } from '@/config/contracts'
 import { flare, coston2 } from '@/config/chains'
 import { BALANCE_POLL_INTERVAL } from '@/lib/constants'
+import { toast } from 'sonner'
 
-export function useStaking() {
+export function useStaking(vaultId: VaultId = 'StFXRP') {
   const { network } = useNetwork()
   const chainId = network === 'flare' ? flare.id : coston2.id
   const { address } = useAccount()
-  const vaultAddress = CONTRACTS[network].StFXRP as `0x${string}`
-  const fxrpAddress = CONTRACTS[network].FXRP as `0x${string}`
+
+  const vault = VAULTS[vaultId]
+  const vaultAddress = CONTRACTS[network][vaultId] as `0x${string}`
+  const assetAddress = CONTRACTS[network][vault.asset as keyof (typeof CONTRACTS)[typeof network]] as `0x${string}`
   const enabled = vaultAddress !== '0x0000000000000000000000000000000000000000'
 
-  // Read stFXRP balance
-  const { data: stFxrpBalance, refetch: refetchBalance } = useReadContract({
+  // Read vault share balance
+  const { data: shareBalance, refetch: refetchBalance } = useReadContract({
     address: vaultAddress,
     abi: stfxrpVaultAbi,
     functionName: 'balanceOf',
@@ -37,7 +39,7 @@ export function useStaking() {
     query: { enabled, refetchInterval: BALANCE_POLL_INTERVAL },
   })
 
-  // Read total supply of stFXRP
+  // Read total supply of vault shares
   const { data: totalSupply } = useReadContract({
     address: vaultAddress,
     abi: stfxrpVaultAbi,
@@ -46,9 +48,9 @@ export function useStaking() {
     query: { enabled, refetchInterval: BALANCE_POLL_INTERVAL },
   })
 
-  // Read user's FXRP balance
-  const { data: fxrpBalance, refetch: refetchFxrp } = useReadContract({
-    address: fxrpAddress,
+  // Read user's underlying asset balance
+  const { data: assetBalance, refetch: refetchAsset } = useReadContract({
+    address: assetAddress,
     abi: erc20Abi,
     functionName: 'balanceOf',
     args: [address!],
@@ -58,7 +60,7 @@ export function useStaking() {
 
   // Read current allowance
   const { data: currentAllowance, refetch: refetchAllowance } = useReadContract({
-    address: fxrpAddress,
+    address: assetAddress,
     abi: erc20Abi,
     functionName: 'allowance',
     args: [address!, vaultAddress],
@@ -66,7 +68,7 @@ export function useStaking() {
     query: { enabled: enabled && !!address },
   })
 
-  // Write: approve FXRP spending
+  // Write: approve asset spending
   const {
     writeContract: writeApprove,
     data: approveTxHash,
@@ -76,23 +78,23 @@ export function useStaking() {
   const { isSuccess: approveConfirmed } = useWaitForTransactionReceipt({ hash: approveTxHash })
 
   const approve = (amount: bigint) => {
-    toast.loading('Waiting for approval...', { id: 'approve' })
+    toast.loading('Waiting for approval...', { id: `approve-${vaultId}` })
     writeApprove(
       {
-        address: fxrpAddress,
+        address: assetAddress,
         abi: erc20Abi,
         functionName: 'approve',
         args: [vaultAddress, amount],
         chainId,
       },
       {
-        onError: () => toast.error('Approval failed', { id: 'approve' }),
-        onSuccess: () => toast.loading('Approval submitted, confirming...', { id: 'approve' }),
+        onError: () => toast.error('Approval failed', { id: `approve-${vaultId}` }),
+        onSuccess: () => toast.loading('Approval submitted, confirming...', { id: `approve-${vaultId}` }),
       },
     )
   }
 
-  // Write: deposit FXRP
+  // Write: deposit asset
   const {
     writeContract: writeDeposit,
     data: depositTxHash,
@@ -103,7 +105,7 @@ export function useStaking() {
     useWaitForTransactionReceipt({ hash: depositTxHash })
 
   const deposit = (amount: bigint) => {
-    toast.loading('Waiting for deposit...', { id: 'deposit' })
+    toast.loading(`Waiting for ${vault.symbol} deposit...`, { id: `deposit-${vaultId}` })
     writeDeposit(
       {
         address: vaultAddress,
@@ -113,13 +115,13 @@ export function useStaking() {
         chainId,
       },
       {
-        onError: () => toast.error('Deposit failed', { id: 'deposit' }),
-        onSuccess: () => toast.loading('Deposit submitted, confirming...', { id: 'deposit' }),
+        onError: () => toast.error('Deposit failed', { id: `deposit-${vaultId}` }),
+        onSuccess: () => toast.loading('Deposit submitted, confirming...', { id: `deposit-${vaultId}` }),
       },
     )
   }
 
-  // Write: redeem stFXRP
+  // Write: redeem shares
   const {
     writeContract: writeRedeem,
     data: redeemTxHash,
@@ -129,7 +131,7 @@ export function useStaking() {
   const { isSuccess: redeemConfirmed } = useWaitForTransactionReceipt({ hash: redeemTxHash })
 
   const redeem = (shares: bigint) => {
-    toast.loading('Waiting for unstake...', { id: 'redeem' })
+    toast.loading('Waiting for unstake...', { id: `redeem-${vaultId}` })
     writeRedeem(
       {
         address: vaultAddress,
@@ -139,8 +141,8 @@ export function useStaking() {
         chainId,
       },
       {
-        onError: () => toast.error('Unstake failed', { id: 'redeem' }),
-        onSuccess: () => toast.loading('Unstake submitted, confirming...', { id: 'redeem' }),
+        onError: () => toast.error('Unstake failed', { id: `redeem-${vaultId}` }),
+        onSuccess: () => toast.loading('Unstake submitted, confirming...', { id: `redeem-${vaultId}` }),
       },
     )
   }
@@ -154,71 +156,64 @@ export function useStaking() {
       toasted.current.add(approveTxHash)
       refetchAllowance()
       toast.success('Approval confirmed', {
-        id: 'approve',
-        description: 'You can now deposit your FXRP into the vault.',
+        id: `approve-${vaultId}`,
+        description: `You can now deposit into the ${vault.symbol} vault.`,
       })
     }
-  }, [approveConfirmed, approveTxHash, refetchAllowance])
+  }, [approveConfirmed, approveTxHash, refetchAllowance, vaultId, vault.symbol])
 
   // Refetch balances + toast after deposit confirms
   useEffect(() => {
     if (depositConfirmed && depositTxHash && !toasted.current.has(depositTxHash)) {
       toasted.current.add(depositTxHash)
       refetchBalance()
-      refetchFxrp()
+      refetchAsset()
       refetchAllowance()
       toast.success('Stake successful!', {
-        id: 'deposit',
-        description: 'Your FXRP has been deposited and you received stFXRP.',
+        id: `deposit-${vaultId}`,
+        description: `You received ${vault.symbol} tokens.`,
         duration: 6000,
       })
     }
-  }, [depositConfirmed, depositTxHash, refetchBalance, refetchFxrp, refetchAllowance])
+  }, [depositConfirmed, depositTxHash, refetchBalance, refetchAsset, refetchAllowance, vaultId, vault.symbol])
 
   // Refetch balances + toast after redeem confirms
   useEffect(() => {
     if (redeemConfirmed && redeemTxHash && !toasted.current.has(redeemTxHash)) {
       toasted.current.add(redeemTxHash)
       refetchBalance()
-      refetchFxrp()
+      refetchAsset()
       toast.success('Unstake successful!', {
-        id: 'redeem',
-        description: 'Your stFXRP has been redeemed for FXRP.',
+        id: `redeem-${vaultId}`,
+        description: `Your ${vault.symbol} has been redeemed.`,
         duration: 6000,
       })
     }
-  }, [redeemConfirmed, redeemTxHash, refetchBalance, refetchFxrp])
+  }, [redeemConfirmed, redeemTxHash, refetchBalance, refetchAsset, vaultId, vault.symbol])
 
   // Calculate exchange rate
   const exchangeRate =
     totalAssets !== undefined && totalSupply !== undefined && (totalSupply as bigint) > 0n
       ? Number(totalAssets as bigint) / Number(totalSupply as bigint)
-      : 1.0 // 1:1 when vault is empty
+      : 1.0
 
   return {
+    vaultId,
+    vault,
     vaultAddress,
     enabled,
-    stFxrpBalance: stFxrpBalance as bigint | undefined,
-    fxrpBalance: fxrpBalance as bigint | undefined,
+    shareBalance: shareBalance as bigint | undefined,
+    assetBalance: assetBalance as bigint | undefined,
     totalAssets: totalAssets as bigint | undefined,
     totalSupply: totalSupply as bigint | undefined,
     currentAllowance: currentAllowance as bigint | undefined,
     exchangeRate,
     approve,
     isApproving,
-    approveConfirmed,
-    approveTxHash,
     deposit,
     isDepositing,
     isDepositConfirming,
-    depositConfirmed,
-    depositTxHash,
     redeem,
     isRedeeming,
-    redeemConfirmed,
-    redeemTxHash,
-    refetchBalance,
-    refetchFxrp,
-    refetchAllowance,
   }
 }

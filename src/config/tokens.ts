@@ -60,6 +60,28 @@ export const TOKENS: TokenMeta[] = [
     },
     feedId: '015852502f55534400000000000000000000000000', // priced same as XRP
   },
+  {
+    symbol: 'stUSDT0',
+    name: 'Staked USDT0',
+    decimals: 6,
+    logo: '/tokens/usdt.svg',
+    address: {
+      flare: '0x0000000000000000000000000000000000000000',
+      coston2: '0x698278d81dab910e6cb0e68f8b503ba3a3f08787',
+    },
+    feedId: '01555344542f555344000000000000000000000000', // priced same as USDT
+  },
+  {
+    symbol: 'stWFLR',
+    name: 'Staked WFLR',
+    decimals: 18,
+    logo: '/tokens/flr.svg',
+    address: {
+      flare: '0x0000000000000000000000000000000000000000',
+      coston2: '0x1adfedc11c41624b4ad28c38ac3fa393f1b879c9',
+    },
+    feedId: '01464c522f55534400000000000000000000000000', // priced same as FLR
+  },
 ]
 
 export const FEED_IDS = {

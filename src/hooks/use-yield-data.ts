@@ -1,6 +1,7 @@
 'use client'
 
 import { DEMO_YIELDS } from '@/lib/constants'
+import type { VaultId } from '@/config/contracts'
 
 export interface YieldOpportunity {
   protocol: string
@@ -10,11 +11,10 @@ export interface YieldOpportunity {
   risk: 'Low' | 'Medium' | 'High'
   description: string
   lockPeriod: string
+  vaultId?: VaultId
 }
 
 export function useYieldData() {
-  // For hackathon: return curated demo data
-  // In production: read from Firelight, earnXRP, FTSO delegation contracts
   const yields: YieldOpportunity[] = DEMO_YIELDS.map((y) => ({
     ...y,
     risk: y.risk as 'Low' | 'Medium' | 'High',
