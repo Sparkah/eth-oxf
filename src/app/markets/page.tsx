@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Target, TrendingUp, Clock, Zap, Brain } from 'lucide-react'
+import { Target, TrendingUp, Clock, Zap, BarChart3 } from 'lucide-react'
 
 const FEED_OPTIONS = [
   { label: 'FLR/USD', id: FEED_IDS['FLR/USD'], priceKey: 'FLR' },
@@ -21,7 +21,7 @@ const FEED_OPTIONS = [
   { label: 'ETH/USD', id: FEED_IDS['ETH/USD'], priceKey: 'ETH' },
 ] as const
 
-// --- AI Probability Estimator ---
+// --- FTSO Price Probability Model ---
 function estimateProbability(
   currentPrice: number,
   targetPrice: number,
@@ -171,8 +171,8 @@ function MarketCard({
   const yesPercent = totalPool > 0n ? Number((market.yesPool * 100n) / totalPool) : 50
   const noPercent = 100 - yesPercent
 
-  // AI estimate
-  const aiProb = estimateProbability(currentPrice, targetPriceNum, deadlineTs, now)
+  // FTSO-based probability estimate
+  const estProb = estimateProbability(currentPrice, targetPriceNum, deadlineTs, now)
 
   const hasUserBet = userBet.yesBet > 0n || userBet.noBet > 0n
   const canClaim = market.resolved && userBet.payout > 0n && !userBet.claimed
@@ -211,12 +211,12 @@ function MarketCard({
           <Progress value={yesPercent} className="h-2" />
         </div>
 
-        {/* AI probability */}
+        {/* FTSO probability estimate */}
         {!market.resolved && (
-          <div className="flex items-center gap-2 text-xs bg-purple-500/10 rounded-md px-2.5 py-1.5">
-            <Brain className="h-3.5 w-3.5 text-purple-500" />
-            <span className="text-purple-300">
-              AI estimates <span className="font-bold">{aiProb}%</span> chance of YES
+          <div className="flex items-center gap-2 text-xs bg-blue-500/10 rounded-md px-2.5 py-1.5">
+            <BarChart3 className="h-3.5 w-3.5 text-blue-500" />
+            <span className="text-blue-300">
+              FTSO estimate: <span className="font-bold">{estProb}%</span> chance of YES
             </span>
             {currentPrice > 0 && (
               <span className="ml-auto text-muted-foreground">
@@ -367,30 +367,27 @@ export default function MarketsPage() {
         <div className="lg:col-span-1">
           <CreateMarketForm onSubmit={createMarket} isCreating={isCreating} />
 
-          {/* AI Info Card */}
+          {/* How it works */}
           <Card className="mt-4">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Brain className="h-4 w-4 text-purple-500" />
-                AI Advisor
+                <BarChart3 className="h-4 w-4 text-blue-500" />
+                How It Works
               </CardTitle>
             </CardHeader>
             <CardContent className="text-xs text-muted-foreground space-y-2">
               <p>
-                Each market shows an AI probability estimate based on:
+                Markets resolve trustlessly using Flare&apos;s FTSO price oracle.
+                After the deadline, anyone can trigger resolution — the contract
+                reads the live price on-chain and determines the outcome.
               </p>
-              <ul className="list-disc pl-4 space-y-0.5">
-                <li>Current FTSO price vs. target price</li>
-                <li>Time remaining until deadline</li>
-                <li>Implied volatility scaling</li>
-              </ul>
               <p>
-                The estimate uses a sigmoid function on the normalized price distance,
-                adjusted for time-based volatility. Not financial advice.
+                The probability estimate uses the current FTSO price relative to
+                the target, adjusted for time remaining. Not financial advice.
               </p>
               <div className="flex gap-2 mt-2">
-                <Badge variant="outline" className="text-purple-400 border-purple-500/30">Deterministic</Badge>
-                <Badge variant="outline" className="text-purple-400 border-purple-500/30">No API Key</Badge>
+                <Badge variant="outline" className="text-blue-400 border-blue-500/30">FTSO Oracle</Badge>
+                <Badge variant="outline" className="text-blue-400 border-blue-500/30">Trustless</Badge>
               </div>
             </CardContent>
           </Card>
