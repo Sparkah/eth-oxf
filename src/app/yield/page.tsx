@@ -1,13 +1,20 @@
 'use client'
 
+import { useRef } from 'react'
 import { useYieldData } from '@/hooks/use-yield-data'
 import { YieldCard } from '@/components/yield/yield-card'
 import { YieldTable } from '@/components/yield/yield-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { TrendingUp } from 'lucide-react'
+import Link from 'next/link'
 
 export default function YieldPage() {
-  const { yields, bestYield, isLoading } = useYieldData()
+  const { yields, isLoading } = useYieldData()
+  const nativeRef = useRef<HTMLDivElement>(null)
+
+  // Our best native vault
+  const bestNative = yields.find((y) => y.vaultId)
 
   return (
     <div className="space-y-6">
@@ -19,7 +26,7 @@ export default function YieldPage() {
         </p>
       </div>
 
-      {bestYield && (
+      {bestNative && (
         <Card className="border-green-500/20 bg-green-500/5">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -27,16 +34,21 @@ export default function YieldPage() {
               Top Recommendation
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-lg font-bold">
-              {bestYield.protocol} — {bestYield.apy}% APY on {bestYield.asset}
-            </p>
-            <p className="text-sm text-muted-foreground mt-1">{bestYield.description}</p>
+          <CardContent className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-lg font-bold">
+                FlareVault — {bestNative.apy}% APY on {bestNative.asset}
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">{bestNative.description}</p>
+            </div>
+            <Link href={`/stake?vault=${bestNative.vaultId}`}>
+              <Button size="sm">Stake Now</Button>
+            </Link>
           </CardContent>
         </Card>
       )}
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div ref={nativeRef} className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {yields.map((y) => (
           <YieldCard key={`${y.protocol}-${y.asset}`} opportunity={y} />
         ))}
