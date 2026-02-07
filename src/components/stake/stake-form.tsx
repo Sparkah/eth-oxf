@@ -47,14 +47,15 @@ export function StakeForm({
 
   const stakeRaw = BigInt(Math.floor(stakeNum * 10 ** DECIMALS))
   const needsApproval = currentAllowance === undefined || stakeRaw > currentAllowance
+  const insufficientBalance = stakeNum > fxrpBalance
 
   const handleApprove = () => {
-    if (stakeNum <= 0) return
+    if (stakeNum <= 0 || insufficientBalance) return
     onApprove?.(stakeRaw)
   }
 
   const handleStake = () => {
-    if (stakeNum <= 0) return
+    if (stakeNum <= 0 || insufficientBalance) return
     onStake?.(stakeRaw)
   }
 
@@ -129,7 +130,7 @@ export function StakeForm({
               <Button
                 className="w-full"
                 size="lg"
-                disabled={!isConnected || stakeNum <= 0 || isApproving}
+                disabled={!isConnected || stakeNum <= 0 || insufficientBalance || isApproving}
                 onClick={handleApprove}
               >
                 {!isConnected
@@ -138,13 +139,15 @@ export function StakeForm({
                     ? 'Approving...'
                     : stakeNum <= 0
                       ? 'Enter Amount'
-                      : `Approve ${stakeNum} FXRP`}
+                      : insufficientBalance
+                        ? 'Insufficient FXRP Balance'
+                        : `Approve ${stakeNum} FXRP`}
               </Button>
             ) : (
               <Button
                 className="w-full"
                 size="lg"
-                disabled={!isConnected || stakeNum <= 0 || isStaking}
+                disabled={!isConnected || stakeNum <= 0 || insufficientBalance || isStaking}
                 onClick={handleStake}
               >
                 {!isConnected
@@ -153,7 +156,9 @@ export function StakeForm({
                     ? 'Staking...'
                     : stakeNum <= 0
                       ? 'Enter Amount'
-                      : `Stake ${stakeNum} FXRP`}
+                      : insufficientBalance
+                        ? 'Insufficient FXRP Balance'
+                        : `Stake ${stakeNum} FXRP`}
               </Button>
             )}
           </TabsContent>
