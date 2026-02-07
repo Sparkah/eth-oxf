@@ -50,9 +50,12 @@ export function useFtsoPrices() {
       }
     })
     // Derived prices
+    prices['C2FLR'] = prices['FLR']
     prices['WFLR'] = prices['FLR']
     prices['FXRP'] = prices['XRP']
-    prices['stXRP'] = prices['XRP'] * 1.05 // stXRP slightly above due to accrued yield
+    prices['FTestXRP'] = prices['XRP']
+    prices['stFXRP'] = prices['XRP'] * 1.05 // stFXRP slightly above due to accrued yield
+    prices['stXRP'] = prices['XRP'] * 1.05
   }
 
   return { prices, isLoading, error, isLive: !!priceData }
