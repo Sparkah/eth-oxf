@@ -46,7 +46,7 @@ export function StakeForm({
   const receiveFxrp = unstakeNum * exchangeRate
 
   const stakeRaw = BigInt(Math.floor(stakeNum * 10 ** DECIMALS))
-  const needsApproval = currentAllowance !== undefined && stakeRaw > currentAllowance
+  const needsApproval = currentAllowance === undefined || stakeRaw > currentAllowance
 
   const handleApprove = () => {
     if (stakeNum <= 0) return
