@@ -4,50 +4,84 @@ import { useState } from 'react'
 import { BridgeForm } from '@/components/bridge/bridge-form'
 import { BridgeStatus } from '@/components/bridge/bridge-status'
 import { useFtsoPrices } from '@/hooks/use-ftso-prices'
+import { useFAssets } from '@/hooks/use-fassets'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
-type MintingStep = 'idle' | 'reserving' | 'awaiting_payment' | 'verifying' | 'minted'
-
 export default function BridgePage() {
   const { prices } = useFtsoPrices()
-  const [mintingStep, setMintingStep] = useState<MintingStep>('idle')
-  const [isReserving, setIsReserving] = useState(false)
+  const [lots, setLots] = useState(1)
 
-  const handleReserve = async (amount: number) => {
-    setIsReserving(true)
-    setMintingStep('reserving')
+  const {
+    enabled,
+    agents,
+    isLoadingAgents,
+    lotSizeXRP,
+    reservationFeeFLR,
+    reserveCollateral,
+    isReserving,
+    isConfirming,
+    isConfirmed,
+    paymentInfo,
+    txHash,
+  } = useFAssets(BigInt(lots))
 
-    // Simulate the minting flow for demo purposes
-    await new Promise((r) => setTimeout(r, 2000))
-    setMintingStep('awaiting_payment')
-    setIsReserving(false)
+  // Best agent = first (sorted by lowest fee)
+  const bestAgent = agents[0] ?? null
+
+  // Determine minting step from hook state
+  const mintingStep = paymentInfo
+    ? 'awaiting_payment' as const
+    : isConfirming
+      ? 'reserving' as const
+      : 'idle' as const
+
+  const handleReserve = () => {
+    if (!bestAgent) return
+    reserveCollateral(bestAgent.agentVault, bestAgent.feeBIPS)
   }
+
+  // Total XRP to send (value + agent fee, in drops → XRP)
+  const xrpToSend = paymentInfo
+    ? Number(paymentInfo.valueUBA + paymentInfo.feeUBA) / 1e6
+    : undefined
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Bridge XRP to FXRP</h1>
+        <h1 className="text-2xl font-bold">Bridge XRP to FTestXRP</h1>
         <p className="text-sm text-muted-foreground">
-          Use FAssets to bring your XRP onto the Flare network as FXRP.
+          Use FAssets to bring your XRP onto the Flare network as FTestXRP.
+          {enabled && agents.length > 0 && (
+            <span className="ml-1">
+              {agents.length} agent{agents.length !== 1 ? 's' : ''} available.
+            </span>
+          )}
         </p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <BridgeForm
           onReserve={handleReserve}
-          isReserving={isReserving}
+          isReserving={isReserving || isConfirming}
           prices={prices}
+          lots={lots}
+          onLotsChange={setLots}
+          lotSizeXRP={lotSizeXRP}
+          reservationFeeFLR={reservationFeeFLR}
+          maxLots={bestAgent ? Number(bestAgent.freeCollateralLots) : 0}
+          agentFeeBIPS={bestAgent ? Number(bestAgent.feeBIPS) : undefined}
+          isLoadingAgents={isLoadingAgents}
+          noAgents={enabled && !isLoadingAgents && agents.length === 0}
         />
 
         <div className="space-y-6">
           <BridgeStatus
             step={mintingStep}
-            agentXrplAddress={
-              mintingStep === 'awaiting_payment'
-                ? 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh'
-                : undefined
-            }
+            agentXrplAddress={paymentInfo?.paymentAddress}
+            paymentReference={paymentInfo?.paymentReference}
+            xrpAmount={xrpToSend}
+            txHash={txHash}
           />
 
           <Card>
@@ -57,10 +91,10 @@ export default function BridgePage() {
             <CardContent className="text-xs text-muted-foreground space-y-2">
               <p>
                 FAssets is Flare&apos;s native bridging protocol that brings non-smart-contract
-                tokens like XRP onto Flare as fully collateralized ERC-20 tokens (FXRP).
+                tokens like XRP onto Flare as fully collateralized ERC-20 tokens (FTestXRP).
               </p>
               <p>
-                Each FXRP is backed by over-collateralization from agents on the Flare network,
+                Each FTestXRP is backed by over-collateralization from agents on the Flare network,
                 verified by the Flare Data Connector (FDC).
               </p>
               <div className="flex gap-2 mt-3">
