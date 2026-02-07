@@ -30,6 +30,7 @@ export function useFAssets(lots: bigint = 1n) {
   const enabled = assetManager !== '0x0000000000000000000000000000000000000000'
 
   const [paymentInfo, setPaymentInfo] = useState<PaymentInfo | null>(null)
+  const [reservationConfirmed, setReservationConfirmed] = useState(false)
   const toastedRef = useRef<Set<string>>(new Set())
 
   // ── Reads ─────────────────────────────────────────────
@@ -121,6 +122,7 @@ export function useFAssets(lots: bigint = 1n) {
   const reserveCollateral = (agentVault: `0x${string}`, maxFeeBips: bigint) => {
     if (!reservationFeeWei) return
     setPaymentInfo(null)
+    setReservationConfirmed(false)
     const toastId = 'fassets-reserve'
     toast.loading('Submitting collateral reservation...', { id: toastId })
 
@@ -152,12 +154,14 @@ export function useFAssets(lots: bigint = 1n) {
     toastedRef.current.add(hash)
 
     // Parse logs for CollateralReserved event
+    let found = false
     for (const log of receipt.logs) {
       try {
         const decoded = decodeEventLog({
           abi: assetManagerAbi,
           data: log.data,
           topics: log.topics,
+          strict: false,
         })
         if (decoded.eventName === 'CollateralReserved') {
           const args = decoded.args as {
@@ -178,15 +182,21 @@ export function useFAssets(lots: bigint = 1n) {
             id: 'fassets-reserve',
             description: `Send XRP to ${args.paymentAddress}`,
           })
-          return
+          found = true
+          break
         }
       } catch {
         // Not our event, skip
       }
     }
 
-    // If we didn't find the event, still mark success
-    toast.success('Transaction confirmed', { id: 'fassets-reserve' })
+    if (!found) {
+      // Event not parsed — mark confirmed anyway
+      setReservationConfirmed(true)
+      toast.success('Transaction confirmed — check explorer for payment details', {
+        id: 'fassets-reserve',
+      })
+    }
   }, [receipt, isConfirmed])
 
   return {
@@ -200,6 +210,7 @@ export function useFAssets(lots: bigint = 1n) {
     isReserving,
     isConfirming,
     isConfirmed,
+    reservationConfirmed,
     paymentInfo,
     txHash,
   }

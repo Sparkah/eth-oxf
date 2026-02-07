@@ -66,7 +66,7 @@ export const assetManagerAbi = [
     inputs: [
       { name: 'agentVault', type: 'address', indexed: true },
       { name: 'minter', type: 'address', indexed: true },
-      { name: 'collateralReservationId', type: 'uint256', indexed: false },
+      { name: 'collateralReservationId', type: 'uint256', indexed: true },
       { name: 'valueUBA', type: 'uint256', indexed: false },
       { name: 'feeUBA', type: 'uint256', indexed: false },
       { name: 'firstUnderlyingBlock', type: 'uint64', indexed: false },

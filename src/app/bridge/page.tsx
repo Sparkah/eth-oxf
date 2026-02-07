@@ -22,6 +22,7 @@ export default function BridgePage() {
     isReserving,
     isConfirming,
     isConfirmed,
+    reservationConfirmed,
     paymentInfo,
     txHash,
   } = useFAssets(BigInt(lots))
@@ -32,9 +33,11 @@ export default function BridgePage() {
   // Determine minting step from hook state
   const mintingStep = paymentInfo
     ? 'awaiting_payment' as const
-    : isConfirming
+    : (isConfirming || isReserving)
       ? 'reserving' as const
-      : 'idle' as const
+      : reservationConfirmed
+        ? 'awaiting_payment' as const // confirmed but no event parsed — still show status
+        : 'idle' as const
 
   const handleReserve = () => {
     if (!bestAgent) return
