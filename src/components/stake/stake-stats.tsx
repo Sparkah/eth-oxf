@@ -4,25 +4,35 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatUsd, formatToken, formatCompact } from '@/lib/utils'
 
 interface StakeStatsProps {
-  stXrpBalance: number
+  shareBalance: number
   exchangeRate: number
   apy: number
   totalStaked: number
-  xrpPrice: number
+  assetPrice: number
+  assetSymbol: string
+  shareSymbol: string
 }
 
-export function StakeStats({ stXrpBalance, exchangeRate, apy, totalStaked, xrpPrice }: StakeStatsProps) {
-  const fxrpValue = stXrpBalance * exchangeRate
-  const usdValue = fxrpValue * xrpPrice
+export function StakeStats({
+  shareBalance,
+  exchangeRate,
+  apy,
+  totalStaked,
+  assetPrice,
+  assetSymbol,
+  shareSymbol,
+}: StakeStatsProps) {
+  const assetValue = shareBalance * exchangeRate
+  const usdValue = assetValue * assetPrice
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       <Card>
         <CardHeader className="pb-1">
-          <CardTitle className="text-xs text-muted-foreground font-normal">Your stXRP</CardTitle>
+          <CardTitle className="text-xs text-muted-foreground font-normal">Your {shareSymbol}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-xl font-bold">{formatToken(stXrpBalance, 2)}</p>
+          <p className="text-xl font-bold">{formatToken(shareBalance, 2)}</p>
           <p className="text-xs text-muted-foreground">{formatUsd(usdValue)}</p>
         </CardContent>
       </Card>
@@ -43,7 +53,7 @@ export function StakeStats({ stXrpBalance, exchangeRate, apy, totalStaked, xrpPr
         </CardHeader>
         <CardContent>
           <p className="text-xl font-bold">{exchangeRate.toFixed(4)}</p>
-          <p className="text-xs text-muted-foreground">FXRP per stXRP</p>
+          <p className="text-xs text-muted-foreground">{assetSymbol} per {shareSymbol}</p>
         </CardContent>
       </Card>
 
@@ -52,8 +62,8 @@ export function StakeStats({ stXrpBalance, exchangeRate, apy, totalStaked, xrpPr
           <CardTitle className="text-xs text-muted-foreground font-normal">Total Staked</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-xl font-bold">${formatCompact(totalStaked * xrpPrice)}</p>
-          <p className="text-xs text-muted-foreground">{formatCompact(totalStaked)} FXRP</p>
+          <p className="text-xl font-bold">${formatCompact(totalStaked * assetPrice)}</p>
+          <p className="text-xs text-muted-foreground">{formatCompact(totalStaked)} {assetSymbol}</p>
         </CardContent>
       </Card>
     </div>

@@ -43,7 +43,7 @@ export function YieldTable({ yields }: { yields: YieldOpportunity[] }) {
                 <TableCell className="font-medium">{y.protocol}</TableCell>
                 <TableCell>{y.asset}</TableCell>
                 <TableCell className="text-right font-bold text-green-500">{y.apy}%</TableCell>
-                <TableCell className="text-right">${formatCompact(y.tvl)}</TableCell>
+                <TableCell className="text-right">{y.tvl > 0 ? `$${formatCompact(y.tvl)}` : '-'}</TableCell>
                 <TableCell>
                   <Badge variant="outline" className={riskColor[y.risk]}>
                     {y.risk}

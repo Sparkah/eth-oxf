@@ -89,11 +89,13 @@ function StakePageInner() {
       </div>
 
       <StakeStats
-        stXrpBalance={shareNum}
+        shareBalance={shareNum}
         exchangeRate={exchangeRate}
         apy={vault.apy}
         totalStaked={totalStakedNum}
-        xrpPrice={assetPrice}
+        assetPrice={assetPrice}
+        assetSymbol={vault.asset === 'FXRP' ? 'FTestXRP' : vault.asset}
+        shareSymbol={vault.symbol}
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
