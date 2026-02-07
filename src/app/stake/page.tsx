@@ -59,7 +59,7 @@ function StakePageInner() {
       <div>
         <h1 className="text-2xl font-bold">Stake</h1>
         <p className="text-sm text-muted-foreground">
-          Deposit tokens into ERC-4626 vaults to receive yield-bearing receipt tokens.
+          Deposit tokens into vaults to receive yield-bearing receipt tokens.
           {enabled && (
             <span className="ml-1 font-mono text-xs">
               Vault: {shortenAddress(vaultAddress)}
@@ -121,7 +121,7 @@ function StakePageInner() {
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground space-y-2">
             <p>
-              The {vault.symbol} vault is an ERC-4626 tokenized vault deployed on Flare.
+              The {vault.symbol} vault is an ERC-4626-style tokenized vault deployed on Flare.
               When you deposit {vault.asset}, you receive {vault.symbol} — a receipt token
               representing your share of the vault.
             </p>
@@ -130,7 +130,7 @@ function StakePageInner() {
               increases, meaning your {vault.symbol} becomes redeemable for more {vault.asset} over time.
             </p>
             <div className="flex gap-2 mt-3">
-              <Badge variant="outline">ERC-4626</Badge>
+              <Badge variant="outline">ERC-4626 Style</Badge>
               <Badge variant="outline">{vault.apy}% APY</Badge>
               <Badge variant="outline">No lock-up</Badge>
             </div>

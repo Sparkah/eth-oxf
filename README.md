@@ -1,6 +1,6 @@
 # FlareVault
 
-A DeFi toolkit and prediction market platform for the Flare ecosystem. FTSO-resolved prediction markets, ERC-4626 staking vaults, FAssets bridge, live curated yield aggregation, and multi-wallet portfolio tracking — all in one UI.
+A DeFi toolkit and prediction market platform for the Flare ecosystem. FTSO-resolved prediction markets, ERC-4626-style staking vaults, FAssets bridge, live curated yield aggregation, and multi-wallet portfolio tracking — all in one UI.
 
 Built for **ETH Oxford 2026** — submitting to **Flare Main Track** + **Prediction Markets & DeFi**.
 
@@ -19,8 +19,8 @@ Binary outcome prediction markets where users bet with native C2FLR on whether a
 - Winners split the entire pot proportionally. No platform fee.
 - Live probability estimates derived from current FTSO price vs target + time remaining
 
-### ERC-4626 Staking Vaults
-Deposit FTestXRP or USDT0 into tokenized vaults to receive yield-bearing receipt tokens (stFXRP, stUSDT0). Exchange rate increases as rewards accrue.
+### ERC-4626-Style Staking Vaults
+Deposit FTestXRP (FXRP) or USDT0 into tokenized vaults to receive yield-bearing receipt tokens (stFXRP, stUSDT0). Exchange rate increases as rewards accrue. Follows the ERC-4626 deposit/redeem pattern with share-based accounting.
 
 ### FAssets Bridge (XRP to Flare)
 Real on-chain FAssets integration — discover available agents, reserve collateral via AssetManager, and receive XRPL payment instructions from the `CollateralReserved` event.
@@ -44,9 +44,9 @@ Track multiple wallet addresses with live FTSOv2 price valuations. Connected wal
 | Contract | Address | Purpose |
 |----------|---------|---------|
 | **FlareBet** | [`0x0520e5acba367ea35c31325d63838ac4255cb5d8`](https://coston2-explorer.flare.network/address/0x0520e5acba367ea35c31325d63838ac4255cb5d8) | Prediction markets |
-| StFXRP Vault | [`0xd0934f2a08e4f41c9969bb11555653524a75952a`](https://coston2-explorer.flare.network/address/0xd0934f2a08e4f41c9969bb11555653524a75952a) | ERC-4626 FTestXRP vault |
-| StUSDT0 Vault | [`0x698278d81dab910e6cb0e68f8b503ba3a3f08787`](https://coston2-explorer.flare.network/address/0x698278d81dab910e6cb0e68f8b503ba3a3f08787) | ERC-4626 USDT0 vault |
-| StWFLR Vault | [`0x1adfedc11c41624b4ad28c38ac3fa393f1b879c9`](https://coston2-explorer.flare.network/address/0x1adfedc11c41624b4ad28c38ac3fa393f1b879c9) | ERC-4626 WFLR vault |
+| StFXRP Vault | [`0xd0934f2a08e4f41c9969bb11555653524a75952a`](https://coston2-explorer.flare.network/address/0xd0934f2a08e4f41c9969bb11555653524a75952a) | FTestXRP (FXRP) vault |
+| StUSDT0 Vault | [`0x698278d81dab910e6cb0e68f8b503ba3a3f08787`](https://coston2-explorer.flare.network/address/0x698278d81dab910e6cb0e68f8b503ba3a3f08787) | USDT0 vault |
+| StWFLR Vault | [`0x1adfedc11c41624b4ad28c38ac3fa393f1b879c9`](https://coston2-explorer.flare.network/address/0x1adfedc11c41624b4ad28c38ac3fa393f1b879c9) | WFLR vault |
 
 ## Architecture
 
@@ -71,7 +71,7 @@ Frontend (Next.js)
 - **Wagmi v3 + viem** — wallet connection, contract reads/writes, multicall
 - **RainbowKit** — wallet UI
 - **shadcn/ui + Tailwind CSS v4** — components
-- **Solidity 0.8.20** — FlareBet prediction market + ERC-4626 vaults
+- **Solidity 0.8.20** — FlareBet prediction market + ERC-4626-style vaults
 - **DeFiLlama API** — live yield data for curated Flare protocols
 - **sonner** — toast notifications for tx lifecycle
 
@@ -124,7 +124,7 @@ src/
 
 contracts/
 ├── FlareBet.sol            # FTSO-resolved prediction markets
-└── StFXRP.sol              # ERC-4626 staking vault
+└── StFXRP.sol              # ERC-4626-style staking vault
 ```
 
 ## Feedback on Building on Flare
@@ -135,7 +135,7 @@ contracts/
 
 - **FTSOv2 for prediction market resolution** — Using `getFeedByIdInWei()` on-chain to resolve prediction markets is clean and trustless. The 18-decimal wei precision meant no decimal conversion needed. The feed ID scheme (category byte + ASCII ticker + zero-padding) is straightforward once you understand the encoding.
 
-- **EVM compatibility** — Standard Solidity patterns work out of the box. We deployed vanilla ERC-4626 vaults and a custom prediction market contract with no Flare-specific modifications needed. The EVM execution environment is fully compatible.
+- **EVM compatibility** — Standard Solidity patterns work out of the box. We deployed ERC-4626-style vaults and a custom prediction market contract with no Flare-specific modifications needed. The EVM execution environment is fully compatible.
 
 - **Coston2 testnet** — Fast block times (~1.8s), reliable faucet, same ContractRegistry address as mainnet. Deployment and testing was smooth throughout the hackathon.
 

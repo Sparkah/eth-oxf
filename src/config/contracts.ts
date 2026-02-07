@@ -29,7 +29,7 @@ export type NetworkId = keyof typeof CONTRACTS
 
 /** Vault configs: maps vault key → underlying token key + display info */
 export const VAULTS = {
-  StFXRP: { asset: 'FXRP', symbol: 'stFXRP', name: 'Staked FXRP', decimals: 6, apy: 8.5 },
+  StFXRP: { asset: 'FXRP', symbol: 'stFXRP', name: 'Staked FTestXRP (FXRP)', decimals: 6, apy: 8.5 },
   StUSDT0: { asset: 'USDT0', symbol: 'stUSDT0', name: 'Staked USDT0', decimals: 6, apy: 5.2 },
 } as const
 

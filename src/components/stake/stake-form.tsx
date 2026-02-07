@@ -36,7 +36,7 @@ export function StakeForm({
   isApproving,
   isStaking,
   isUnstaking,
-  assetSymbol = 'FXRP',
+  assetSymbol = 'FTestXRP',
   shareSymbol = 'stFXRP',
   decimals = 6,
 }: StakeFormProps) {

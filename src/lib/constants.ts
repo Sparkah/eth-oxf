@@ -6,9 +6,9 @@ export const FEED_IDS = {
   'ETH/USD': '0x014554482f55534400000000000000000000000000',
 } as const
 
-// Polling intervals (ms)
-export const BALANCE_POLL_INTERVAL = 30_000
-export const PRICE_POLL_INTERVAL = 10_000
+// Polling intervals (ms) — conservative to avoid RPC rate limits
+export const BALANCE_POLL_INTERVAL = 60_000
+export const PRICE_POLL_INTERVAL = 30_000
 
 // Demo / fallback data for when chain reads fail
 export const DEMO_PRICES: Record<string, number> = {
@@ -31,7 +31,7 @@ export const DEMO_YIELDS = [
     apy: 8.5,
     tvl: 0,
     risk: 'Low' as const,
-    description: 'Stake FTestXRP into the ERC-4626 stFXRP vault. Yield accrues from FTSO delegation rewards.',
+    description: 'Stake FTestXRP (FXRP) into the stFXRP vault. Yield accrues from FTSO delegation rewards.',
     lockPeriod: 'None',
     vaultId: 'StFXRP' as const,
   },

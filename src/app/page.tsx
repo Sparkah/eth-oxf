@@ -38,7 +38,7 @@ export default function LandingPage() {
           { icon: Shield, label: 'Portfolio', desc: 'Track all tokens' },
           { icon: TrendingUp, label: 'Yield', desc: 'Compare APYs' },
           { icon: ArrowLeftRight, label: 'Bridge', desc: 'XRP to FXRP' },
-          { icon: Coins, label: 'Stake', desc: 'Earn stXRP' },
+          { icon: Coins, label: 'Stake', desc: 'Earn stFXRP' },
         ].map((item) => (
           <div
             key={item.label}
