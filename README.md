@@ -22,11 +22,13 @@ Built for **ETH Oxford 2026** (Flare track).
 
 ## Deployed Contracts
 
-| Contract | Network | Address |
-|----------|---------|---------|
-| StFXRP Vault (ERC-4626) | Coston2 | `0xd0934f2a08e4f41c9969bb11555653524a75952a` |
+| Contract | Asset | Network | Address |
+|----------|-------|---------|---------|
+| StFXRP Vault | FTestXRP | Coston2 | `0xd0934f2a08e4f41c9969bb11555653524a75952a` |
+| StUSDT0 Vault | USDT0 | Coston2 | `0x698278d81dab910e6cb0e68f8b503ba3a3f08787` |
+| StWFLR Vault | WFLR | Coston2 | `0x1adfedc11c41624b4ad28c38ac3fa393f1b879c9` |
 
-The vault accepts FTestXRP (`0x0b6A3645c240605887a5532109323A3E12273dc7`) and mints stFXRP shares proportional to the depositor's share of total vault assets.
+All vaults follow the ERC-4626 tokenized vault standard. Deposit the underlying asset to receive yield-bearing receipt tokens (stFXRP, stUSDT0, stWFLR).
 
 ## Tech Stack
 
