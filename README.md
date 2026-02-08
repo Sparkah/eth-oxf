@@ -4,7 +4,7 @@ A DeFi toolkit and prediction market platform for the Flare ecosystem. FTSO-reso
 
 Built for **ETH Oxford 2026** — submitting to **Flare Main Track** + **Prediction Markets & DeFi**.
 
-> **Pitch Video:** [TODO — add link]
+> **Pitch Video:** [Watch on YouTube](https://www.youtube.com/watch?v=c0omcopltgI)
 >
 > **Live Demo:** Deployed on Coston2 testnet. Clone, `npm install --legacy-peer-deps`, `npm run dev`.
 
